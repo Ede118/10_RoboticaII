@@ -11,7 +11,7 @@ end
 
 %% recorrido cartesiano con weaving e inclinacion
 
-% parametros del cilindro y la soldadura
+% parametros del cilindro y el traslado del vaso
 R = 1.2;                    % radio del cilindro [m]
 A = 0.01;                   % amplitud del weaving [m]
 A_ang = A / R;              % paso a rads
@@ -103,14 +103,14 @@ Trayectoria_Adv = (1 - peso) .* Trayectoria_Adv + peso .* Suave_Adv;
 % normalizo los vectores para que la matriz de rotacion no se rompa
 Trayectoria_Adv = Trayectoria_Adv ./ vecnorm(Trayectoria_Adv, 2, 2);
 
-%% saco el angulo de ataque y orientacion de la antorcha
+%% saco el angulo de ataque y orientacion del vaso
 CPosition = zeros(Total_Pasos, 6); 
 
 for i = 1:Total_Pasos
     th = Trayectoria_Theta(i);
     t_adv = Trayectoria_Adv(i, :);
     
-    % eje z de la antorcha apuntando al centro del cilindro (desde adentro, hacia afuera)
+    % eje z del vaso apuntando al centro del cilindro (desde adentro, hacia afuera)
     a_vec = [cos(th); sin(th); 0];
     
     % armo base ortonormal [n, o, a] usando z global para no perder ortogonalidad
@@ -119,9 +119,7 @@ for i = 1:Total_Pasos
     n_vec = n_vec / norm(n_vec);
     o_vec = cross(a_vec, n_vec); 
     
-    R_perp = [n_vec, o_vec, a_vec]; 
-    
-    % inclino la antorcha 15 grados en la direccion que avanza
+    % inclino el vaso 15 grados en la direccion que avanza
     eje_giro = cross(a_vec, t_adv');
     
     if norm(eje_giro) > 1e-6
@@ -246,11 +244,11 @@ end
 
 % armo vector de tiempo para que coincida con los 3 bloques de la trayectoria
 cant_tramos = 4;
-tiempo_soldadura = cant_tramos * tiempo_por_tramo; 
+tiempo_traslado = cant_tramos * tiempo_por_tramo; 
 
 t_app = linspace(0, tiempo_homing, pasos_homing)';
-t_mid = linspace(tiempo_homing, tiempo_homing + tiempo_soldadura, size(Q_middle, 1))';
-t_ret = linspace(tiempo_homing + tiempo_soldadura, tiempo_homing + tiempo_soldadura + tiempo_homing, pasos_homing)';
+t_mid = linspace(tiempo_homing, tiempo_homing + tiempo_traslado, size(Q_middle, 1))';
+t_ret = linspace(tiempo_homing + tiempo_traslado, tiempo_homing + tiempo_traslado + tiempo_homing, pasos_homing)';
 
 t_total = [t_app; t_mid(2:end); t_ret(2:end)];
 Total_Pasos_Articulares = length(t_total);
@@ -344,7 +342,7 @@ y1lim = -2; y2lim = 2;
 z1lim = -0.1; z2lim = 2;
 WS = [x1lim x2lim y1lim y2lim z1lim z2lim];
 
-figure('Color', 'w', 'Name', 'Simulación de Soldadura Interna', ...
+figure('Color', 'w', 'Name', 'Simulación de Traslado de Vaso Interno', ...
     'WindowStyle', 'normal', 'Units', 'pixels', 'Position', [100 100 1920 1080]); grid on; 
 hold on;
 
@@ -353,7 +351,7 @@ hold on;
 Zc = Zc * (z2 + 0.2); 
 surf(Xc, Yc, Zc, 'FaceColor', [0.7 0.7 0.7], 'EdgeColor', 'none', 'FaceAlpha', 0.4);
 
-% trazo el cordon en rojo y un punto verde donde arranca
+% trazo la trayectoria en rojo y un punto verde donde arranca
 plot3(Trayectoria_X, Trayectoria_Y, Trayectoria_Z, 'r-', 'LineWidth', 1);
 plot3(Trayectoria_X(1), Trayectoria_Y(1), Trayectoria_Z(1), 'g.', 'MarkerSize', 20); 
 
@@ -375,7 +373,7 @@ if guardar_video
         'linkcolor', [.2 .2 .2], ...
         'jointcolor', [1 .4 0], ...
         'fps', 60, ...
-        'movie', 'Simulacion_Soldadura_IN.mp4'...
+        'movie', 'Simulacion_Traslado_IN.mp4'...
     );
 else
     Robot.plot(...
