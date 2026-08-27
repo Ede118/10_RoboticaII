@@ -8,39 +8,19 @@ clc; close all;
 
 % uso esta notacion de denavit-hartenberg (es la del informe)
 DH = [
-    0       0.450   0.075    pi/2   0;   % Joint 1
-    0       0.000   0.640    0      0;   % Joint 2
-    0       0.000   0.195    pi/2   0;   % Joint 3
-    0       0.700   0.000    -pi/2  0;   % Joint 4
-    0       0.000   0.000    pi/2  0;   % Joint 5
-    0       0.075   0.000    0      0];  % Joint 6
-% %  theta      d       a     alpha  sigma
+    0       0       0        pi/2   0;   % Joint 1
+    0       0       15       0      0;   % Joint 2
+    0       0       15       0      0];  % Joint 3
+%  theta    d       a      alpha  sigma
 
-% esta otra me dejaba ver mejor la etiqueta del eje q4,
-% pero es solo para dibujar lindo el plot de matlab
-% DH = [
-%     0       0.450   0.075    pi/2       0;   % Joint 1
-%     0       0.000   0.640    0          0;   % Joint 2
-%     0       0.000   0.195    -pi/2      0;   % Joint 3
-%     0       -0.700   0.000   pi/2       0;   % Joint 4
-%     0       0.000   0.000    -pi/2      0;   % Joint 5
-%     0       0.075   0.000    -pi        0];  % Joint 6
-% %  theta      d       a     alpha  sigma
-
-name = 'ARC Mate 100iD';
+name = 'Robot_3GDL_BaseZ';
 qlim = deg2rad([ ...
-   -170     170;       % qlim1
-   -117.5   117.5;     % qlim2
-   -170     170;       % qlim3
-   -190     190;       % qlim4
-   -180     180;       % qlim5
-   -450     450]);     % qlim6
+   -180     180;       % qlim1
+   -180     180;       % qlim2
+   -135     135]);     % qlim3
 
 
 offset = deg2rad([
-    90; 
-    75; 
-    25; 
     0; 
     0; 
     0]);
@@ -58,12 +38,15 @@ Robot.offset = offset;
 Robot.base = base;
 Robot.tool = tool;
 
+% Mantener variable 'robot' (con minúscula) para compatibilidad
+robot = Robot;
+
 %% limites del plot (workspace)
-x1lim = -2;
-x2lim = 2;
-y1lim = -2;
-y2lim = 2;
-z1lim = -0.1;
-z2lim = 2;
+x1lim = -35;
+x2lim = 35;
+y1lim = -35;
+y2lim = 35;
+z1lim = -10;
+z2lim = 35;
 
 WS = [x1lim x2lim y1lim y2lim z1lim z2lim];

@@ -23,7 +23,7 @@ pasos = 400;   % Cantidad de puntos por tramo
 P0 = [-L, 4*R, 0];
 
 % Vector de tiempo interpolado (ley temporal trapezoidal lspb)
-[u, ud, udd] = lspb(0, 1, pasos); 
+[u, ud, udd] = tpoly(0, 1, pasos); 
 
 %% ============================================================
 % GENERACIÓN DE TRAMOS CON LEY TEMPORAL Y VECTORES DE AVANCE
@@ -123,49 +123,11 @@ Trayectoria_Adv = Trayectoria_Adv ./ vecnorm(Trayectoria_Adv, 2, 2);
 
 
 %% ============================================================
-% CÁLCULO DE LA ORIENTACIÓN DE LA ANTORCHA
+% POSICIÓN DEL VASO (SOLO POSICIÓN CARTESIANA)
 % =============================================================
 
-CPosition = zeros(Total_Pasos, 6); 
-alpha_tilt = deg2rad(15); % Ángulo de empuje (15°)
-
-for i = 1:Total_Pasos
-    t_adv = Trayectoria_Adv(i, :);
-    
-    % Proyección horizontal de la dirección de avance
-    t_horiz = [t_adv(1); t_adv(2); 0];
-    if norm(t_horiz) > 1e-6
-        n_vec = t_horiz / norm(t_horiz);
-    else
-        n_vec = [1; 0; 0];
-    end
-    
-    % Eje Z de la antorcha apuntando hacia abajo (hacia el plano de trabajo)
-    a_vec = [0; 0; -1];
-    
-    % Eje Y completa la terna ortonormal
-    o_vec = cross(a_vec, n_vec); 
-    o_vec = o_vec / norm(o_vec);
-    
-    R_perp = [n_vec, o_vec, a_vec]; 
-    
-    % Inclinación de la antorcha en el sentido de avance
-    eje_giro = cross(a_vec, t_adv');
-    
-    if norm(eje_giro) > 1e-6
-        eje_giro = eje_giro / norm(eje_giro);
-        R_tilt = angvec2r(alpha_tilt, eje_giro); 
-        R_final = R_tilt * R_perp;
-    else
-        R_final = R_perp; 
-    end
-    
-    % Transformación a Roll-Pitch-Yaw
-    rpy = tr2rpy(R_final); 
-    
-    % Guardar la pose cartesiana
-    CPosition(i, :) = [Trayectoria_X(i); Trayectoria_Y(i); Trayectoria_Z(i); rpy'];
-end
+% Dado que el robot tiene 3 GDL, solo se requiere la posición X, Y, Z
+CPosition = [Trayectoria_X, Trayectoria_Y, Trayectoria_Z];
 
 
 %% ============================================================
@@ -173,15 +135,15 @@ end
 % =============================================================
 
 % Cargar el modelo del robot
-S01_my_robot;
+RobotSerie;
 
 % Semilla inicial (Front - Elbow Up)
-q_semilla_inicial = [0, pi/4, -pi/4, 0, pi/2, 0]; 
+q_semilla_inicial = [0, pi/4, -pi/4]; 
 
 [Q_middle] = CinematicaInversa(Robot, CPosition, q_semilla_inicial);
 
 % Homing para acercamiento y retirada
-q_home = [0, 0, 0, 0, pi/2, 0]; 
+q_home = [0, 0, 0]; 
 pasos_homing = 50; 
 tiempo_homing = 5; % segundos
 
@@ -278,24 +240,24 @@ end
 % =============================================================
 
 cant_tramos = 4;
-tiempo_soldadura = cant_tramos * tiempo_por_tramo; 
+tiempo_traslado = cant_tramos * tiempo_por_tramo; 
 
 t_app = linspace(0, tiempo_homing, pasos_homing)';
-t_mid = linspace(tiempo_homing, tiempo_homing + tiempo_soldadura, size(Q_middle, 1))';
-t_ret = linspace(tiempo_homing + tiempo_soldadura, tiempo_homing + tiempo_soldadura + tiempo_homing, pasos_homing)';
+t_mid = linspace(tiempo_homing, tiempo_homing + tiempo_traslado, size(Q_middle, 1))';
+t_ret = linspace(tiempo_homing + tiempo_traslado, tiempo_homing + tiempo_traslado + tiempo_homing, pasos_homing)';
 
 t_total = [t_app; t_mid(2:end); t_ret(2:end)];
 Total_Pasos_Articulares = length(t_total);
 
-V_art = zeros(Total_Pasos_Articulares, 6);
-A_art = zeros(Total_Pasos_Articulares, 6);
+V_art = zeros(Total_Pasos_Articulares, 3);
+A_art = zeros(Total_Pasos_Articulares, 3);
 
-for j = 1:6
+for j = 1:3
     V_art(:, j) = gradient(Q(:, j), t_total);
     A_art(:, j) = gradient(V_art(:, j), t_total);
 end
 
-nombres_ejes = {'q_1 (Base)', 'q_2 (Hombro)', 'q_3 (Codo)', 'q_4 (Muñeca 1)', 'q_5 (Muñeca 2)', 'q_6 (Muñeca 3)'};
+nombres_ejes = {'q_1 (Base)', 'q_2 (Hombro)', 'q_3 (Codo)'};
 
 % Gráfico de posición articular
 fig_q = figure('Color', 'w', 'Name', 'Posición Articular');
@@ -329,7 +291,7 @@ disp('Calculando Determinante del Jacobiano...');
 det_J = zeros(Total_Pasos_Articulares, 1);
 for j = 1:Total_Pasos_Articulares
     J = Robot.jacob0(Q(j,:));
-    det_J(j) = det(J);
+    det_J(j) = det(J(1:3, :)); % Determinante de la parte de traslación (3x3)
 end
 
 fig_m = figure('Color', 'w', 'Name', 'Determinante del Jacobiano');
@@ -375,12 +337,12 @@ y1lim = -0.5; y2lim = 0.5;
 z1lim = -0.2; z2lim = 0.8;
 WS = [x1lim x2lim y1lim y2lim z1lim z2lim];
 
-figure('Color', 'w', 'Name', 'Simulación de Soldadura - Ley Temporal', ...
+figure('Color', 'w', 'Name', 'Simulación de Traslado de Vaso - Ley Temporal', ...
     'WindowStyle', 'normal', 'Units', 'pixels', 'Position', [100 100 1920 1080]); 
 grid on; 
 hold on;
 
-% Trazo el cordón en rojo y punto verde al inicio
+% Trazo la trayectoria en rojo y punto verde al inicio
 plot3(Trayectoria_X, Trayectoria_Y, Trayectoria_Z, 'r-', 'LineWidth', 2);
 plot3(Trayectoria_X(1), Trayectoria_Y(1), Trayectoria_Z(1), 'g.', 'MarkerSize', 20); 
 
@@ -400,7 +362,7 @@ if guardar_video
         'linkcolor', [.2 .2 .2], ...
         'jointcolor', [1 .4 0], ...
         'fps', 60, ...
-        'movie', 'Simulacion_Soldadura_LT.mp4'...
+        'movie', 'Simulacion_Traslado_LT.mp4'...
     );
 else
     Robot.plot(...
@@ -431,5 +393,13 @@ function toggleSignal(~, event)
         event.Peer.Visible = 'off';
     else
         event.Peer.Visible = 'on';
+    end
+end
+
+function Q = CinematicaInversa(Robot, CPosition, ~)
+    N = size(CPosition, 1);
+    Q = zeros(N, 3);
+    for i = 1:N
+        Q(i, :) = FncCinematicaInversa(Robot, CPosition(i, :));
     end
 end
