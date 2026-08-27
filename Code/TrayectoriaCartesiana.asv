@@ -1,0 +1,390 @@
+function [x, y, z] = TrayectoriaCartesiana(P0, graficar)
+
+%% Trayectoria cartesiana por 4 tramos
+
+%% ============================================================
+% PARÁMETROS
+% =============================================================
+
+L = 0.10;      % Longitud recorrida por T1 y T4 [m]
+R = 0.025;      % Radio / amplitud [m]
+H = 2*R;       % Descenso total de T2 [m]
+
+N = 400;       % Cantidad de puntos por tramo
+
+% Punto inicial de toda la trayectoria
+P0 = [-L, 4*R, 0];
+
+
+%% ============================================================
+% T1
+%
+% Avance L en X.
+% Cuarto de onda sinusoidal en Y y Z.
+%
+% P0 = [-L, 0, 0]
+% P1 = [ 0, R, R]
+% =============================================================
+
+theta1 = linspace(0, pi/2, N);
+
+xT1 = P0(1) + (2*L/pi)*theta1;
+yT1 = P0(2) + R*sin(theta1);
+zT1 = P0(3) + R*sin(theta1);
+
+P1 = [xT1(end), yT1(end), zT1(end)];
+
+
+%% ============================================================
+% T2
+%
+% Circunferencia completa en XY.
+%
+% P1 es el punto superior.
+% La circunferencia está ubicada "hacia abajo".
+%
+% Centro XY:
+% C2 = [P1_x, P1_y - R]
+%
+% T2 sale tangente a T1 en dirección +X.
+%
+% Simultáneamente desciende H en Z.
+% =============================================================
+
+theta2 = linspace(0, 2*pi, N);
+
+xT2 = P1(1) + R*sin(theta2);
+
+yT2 = P1(2) ...
+    - R ...
+    + R*cos(theta2);
+
+zT2 = P1(3) ...
+    - (H/2)*(1 - cos(theta2/2));
+
+P2 = [xT2(end), yT2(end), zT2(end)];
+
+
+%% ============================================================
+% T3
+%
+% Desplazamiento recto de -2R en Y.
+%
+% Su punto final coincide, proyectado en XY,
+% con el punto inferior de la circunferencia T2.
+% =============================================================
+
+s3 = linspace(0, 1, N);
+
+xT3 = P2(1)*ones(size(s3));
+
+yT3 = P2(2) ...
+    - 2*R*s3;
+
+zT3 = P2(3)*ones(size(s3));
+
+P3 = [xT3(end), yT3(end), zT3(end)];
+
+
+%% ============================================================
+% T4
+%
+% Avance L en X.
+%
+% Incremento R en Y y Z con concavidad opuesta a T1.
+% =============================================================
+
+theta4 = linspace(0, pi/2, N);
+
+xT4 = P3(1) ...
+    + (2*L/pi)*theta4;
+
+yT4 = P3(2) ...
+    + R*(1 - cos(theta4));
+
+zT4 = P3(3) ...
+    + R*(1 - cos(theta4));
+
+P4 = [xT4(end), yT4(end), zT4(end)];
+
+
+%% ============================================================
+% CONCATENACIÓN
+% =============================================================
+
+x = [ ...
+    xT1, ...
+    xT2(2:end), ...
+    xT3(2:end), ...
+    xT4(2:end) ...
+];
+
+y = [ ...
+    yT1, ...
+    yT2(2:end), ...
+    yT3(2:end), ...
+    yT4(2:end) ...
+];
+
+z = [ ...
+    zT1, ...
+    zT2(2:end), ...
+    zT3(2:end), ...
+    zT4(2:end) ...
+];
+
+
+%% ============================================================
+% GRÁFICO 3D
+% =============================================================
+
+figure;
+hold on;
+grid on;
+axis equal;
+
+plot3(xT1, yT1, zT1, 'LineWidth',2);
+plot3(xT2, yT2, zT2, 'LineWidth',2);
+plot3(xT3, yT3, zT3, 'LineWidth',2);
+plot3(xT4, yT4, zT4, 'LineWidth',2);
+
+% Puntos característicos
+P = [
+    P0;
+    P1;
+    P2;
+    P3;
+    P4
+];
+
+plot3( ...
+    P(:,1), ...
+    P(:,2), ...
+    P(:,3), ...
+    'ko', ...
+    'MarkerFaceColor','k', ...
+    'MarkerSize',6 ...
+);
+
+xlabel('X [m]');
+ylabel('Y [m]');
+zlabel('Z [m]');
+
+title('Trayectoria cartesiana completa');
+
+legend( ...
+    'T_1', ...
+    'T_2', ...
+    'T_3', ...
+    'T_4', ...
+    'Puntos de unión', ...
+    'Location','best' ...
+);
+
+view(3);
+
+
+%% ============================================================
+% PROYECCIÓN XY
+% =============================================================
+
+figure;
+hold on;
+grid on;
+axis equal;
+
+plot(xT1, yT1, 'LineWidth',2);
+plot(xT2, yT2, 'LineWidth',2);
+plot(xT3, yT3, 'LineWidth',2);
+plot(xT4, yT4, 'LineWidth',2);
+
+plot(P1(1), P1(2), ...
+    'ko', 'MarkerFaceColor','k');
+
+plot(P3(1), P3(2), ...
+    'ko', 'MarkerFaceColor','k');
+
+% Centro de la circunferencia
+C2 = [
+    P1(1), ...
+    P1(2) - R
+];
+
+plot(C2(1), C2(2), ...
+    'kx', ...
+    'LineWidth',2, ...
+    'MarkerSize',10);
+
+xlabel('X [m]');
+ylabel('Y [m]');
+
+title('Proyección sobre el plano XY');
+
+legend( ...
+    'T_1', ...
+    'T_2', ...
+    'T_3', ...
+    'T_4', ...
+    'P_1', ...
+    'P_3', ...
+    'Centro T_2', ...
+    'Location','best' ...
+);
+
+
+%% ============================================================
+% PROYECCIÓN XZ
+% =============================================================
+
+figure;
+hold on;
+grid on;
+axis equal;
+
+plot(xT1, zT1, 'LineWidth',2);
+plot(xT2, zT2, 'LineWidth',2);
+plot(xT3, zT3, 'LineWidth',2);
+plot(xT4, zT4, 'LineWidth',2);
+
+xlabel('X [m]');
+ylabel('Z [m]');
+
+title('Proyección sobre el plano XZ');
+
+legend('T_1','T_2','T_3','T_4');
+
+
+%% ============================================================
+% PROYECCIÓN YZ
+% =============================================================
+
+figure;
+hold on;
+grid on;
+axis equal;
+
+plot(yT1, zT1, 'LineWidth',2);
+plot(yT2, zT2, 'LineWidth',2);
+plot(yT3, zT3, 'LineWidth',2);
+plot(yT4, zT4, 'LineWidth',2);
+
+xlabel('Y [m]');
+ylabel('Z [m]');
+
+title('Proyección sobre el plano YZ');
+
+legend('T_1','T_2','T_3','T_4');
+
+
+%% ============================================================
+% INFORMACIÓN GEOMÉTRICA
+% =============================================================
+
+fprintf('\n================ PUNTOS ================\n');
+
+fprintf('P0 = [% .3f, % .3f, % .3f]\n', P0);
+fprintf('P1 = [% .3f, % .3f, % .3f]\n', P1);
+fprintf('P2 = [% .3f, % .3f, % .3f]\n', P2);
+fprintf('P3 = [% .3f, % .3f, % .3f]\n', P3);
+fprintf('P4 = [% .3f, % .3f, % .3f]\n', P4);
+
+
+%% ============================================================
+% DESPLAZAMIENTO TOTAL
+% =============================================================
+
+DeltaP = P4 - P0;
+
+fprintf('\n========== DESPLAZAMIENTO TOTAL ==========\n');
+
+fprintf( ...
+    'DeltaP = [% .3f, % .3f, % .3f]\n', ...
+    DeltaP ...
+);
+
+
+%% ============================================================
+% COMPROBACIÓN DE POSICIÓN FINAL
+% =============================================================
+
+Pfinal_deseado = [L, 0, 0];
+
+error_final = P4 - Pfinal_deseado;
+
+fprintf('\n========== POSICIÓN FINAL ==========\n');
+
+fprintf( ...
+    'P4 deseado = [% .3f, % .3f, % .3f]\n', ...
+    Pfinal_deseado ...
+);
+
+fprintf( ...
+    'Error final = [% .3e, % .3e, % .3e]\n', ...
+    error_final ...
+);
+
+
+%% ============================================================
+% COMPROBACIÓN DE TANGENCIA T1 -> T2
+% =============================================================
+
+dT1_final = [
+    2*L/pi;
+    0;
+    0
+];
+
+dT2_initial = [
+    R;
+    0;
+    0
+];
+
+fprintf('\n========== TANGENCIA T1 -> T2 ==========\n');
+
+fprintf('Tangente final de T1:\n');
+disp(dT1_final.');
+
+fprintf('Tangente inicial de T2:\n');
+disp(dT2_initial.');
+
+
+%% ============================================================
+% PUNTOS ESPECIALES DE LA CIRCUNFERENCIA
+% =============================================================
+
+P_sup = [
+    xT2(1), ...
+    yT2(1)
+];
+
+[~, idx_inf] = min(abs(theta2 - pi));
+
+P_inf = [
+    xT2(idx_inf), ...
+    yT2(idx_inf)
+];
+
+fprintf('\n====== CIRCUNFERENCIA T2 EN XY ======\n');
+
+fprintf( ...
+    'Centro = [% .3f, % .3f]\n', ...
+    C2 ...
+);
+
+fprintf( ...
+    'Punto superior = [% .3f, % .3f]\n', ...
+    P_sup ...
+);
+
+fprintf( ...
+    'Punto inferior = [% .3f, % .3f]\n', ...
+    P_inf ...
+);
+
+fprintf( ...
+    'P3 proyectado = [% .3f, % .3f]\n', ...
+    P3(1), P3(2) ...
+);
+
+end
