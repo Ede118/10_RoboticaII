@@ -13,9 +13,9 @@ end
 % PARÁMETROS GEOMÉTRICOS Y TEMPORALES
 % =============================================================
 
-L = 0.10;      % Longitud recorrida por T1 y T4 [m]
-R = 0.025;     % Radio / amplitud [m]
-H = 2*R;       % Descenso total de T2 [m]
+L = 100;      % Longitud recorrida por T1 y T4 [mm]
+R = 25;       % Radio / amplitud [mm]
+H = 2*R;      % Descenso total de T2 [mm]
 
 pasos = 400;   % Cantidad de puntos por tramo
 
@@ -137,8 +137,8 @@ CPosition = [Trayectoria_X, Trayectoria_Y, Trayectoria_Z];
 % Cargar el modelo del robot
 RobotSerie;
 
-% Semilla inicial (Front - Elbow Up)
-q_semilla_inicial = [0, pi/4, -pi/4]; 
+% Semilla inicial
+q_semilla_inicial = [0, 0, 0]; 
 
 [Q_middle] = CinematicaInversa(Robot, CPosition, q_semilla_inicial);
 
@@ -162,7 +162,7 @@ fprintf('Matriz Target_Poses (%dx6) generada con éxito.\n', size(Q, 1));
 % ANÁLISIS EN EL ESPACIO CARTESIANO
 % =============================================================
 
-tiempo_por_tramo = 60; 
+tiempo_por_tramo = 20; 
 t = linspace(0, tiempo_por_tramo, pasos);
 dt = t(2) - t(1); 
 
@@ -171,7 +171,7 @@ Tramos_Y = {yT1, yT2, yT3, yT4};
 Tramos_Z = {zT1, zT2, zT3, zT4};
 Nombres = {'Tramo 1 (Subida)', 'Tramo 2 (Círculo)', 'Tramo 3 (Recta Y)', 'Tramo 4 (Salida)'};
 
-carpeta_destino_C = 'Graficos_Cinematica_Cartesiana_LT';
+carpeta_destino_C = 'graficos/Graficos_Cinematica_Cartesiana_LT';
 if ~exist(carpeta_destino_C, 'dir')
     mkdir(carpeta_destino_C);
 end
@@ -195,7 +195,7 @@ for i = 1:4
     fig1 = figure('Color', 'w', 'Name', ['Posicion - ' Nombres{i}]);
     plot(t, [X Y Z], 'LineWidth', 1.5);
     title(['Posición Cartesiana - ' Nombres{i}]);
-    ylabel('Posición [m]'); xlabel('Tiempo [s]');
+    ylabel('Posición [mm]'); xlabel('Tiempo [s]');
     lgdX = legend('X', 'Y', 'Z', 'Location', 'eastoutside'); 
     lgdX.ItemHitFcn = @toggleSignal;
     grid on; grid minor;
@@ -204,7 +204,7 @@ for i = 1:4
     fig2 = figure('Color', 'w', 'Name', ['Velocidad - ' Nombres{i}]);
     plot(t, [Vx Vy Vz], 'LineWidth', 1.5);
     title(['Velocidad Cartesiana - ' Nombres{i}]);
-    ylabel('Velocidad [m/s]'); xlabel('Tiempo [s]');
+    ylabel('Velocidad [mm/s]'); xlabel('Tiempo [s]');
     lgdV = legend('V_x', 'V_y', 'V_z', 'Location', 'eastoutside'); 
     lgdV.ItemHitFcn = @toggleSignal;
     grid on; grid minor;
@@ -213,7 +213,7 @@ for i = 1:4
     fig3 = figure('Color', 'w', 'Name', ['Aceleración - ' Nombres{i}]);
     plot(t, [Ax Ay Az], 'LineWidth', 1.5);
     title(['Aceleración Cartesiana - ' Nombres{i}]);
-    ylabel('Acel. [m/s^2]'); xlabel('Tiempo [s]');
+    ylabel('Acel. [mm/s^2]'); xlabel('Tiempo [s]');
     lgdA = legend('A_x', 'A_y', 'A_z', 'Location', 'eastoutside'); 
     lgdA.ItemHitFcn = @toggleSignal;
     grid on; grid minor;
@@ -300,7 +300,7 @@ title('Determinante del Jacobiano Geométrico (det(J))');
 ylabel('det(J)'); xlabel('Tiempo [s]');
 grid on; grid minor;
 
-carpeta_destino_Q = 'Graficos_Cinematica_Articular_LT';
+carpeta_destino_Q = 'graficos/Graficos_Cinematica_Articular_LT';
 if ~exist(carpeta_destino_Q, 'dir')
     mkdir(carpeta_destino_Q);
 end
@@ -332,9 +332,9 @@ pause()
 % ANIMACIÓN DEL ROBOT
 % =============================================================
 
-x1lim = -0.5; x2lim = 0.5;
-y1lim = -0.5; y2lim = 0.5;
-z1lim = -0.2; z2lim = 0.8;
+x1lim = -350; x2lim = 350;
+y1lim = -350; y2lim = 350;
+z1lim = -100; z2lim = 350;
 WS = [x1lim x2lim y1lim y2lim z1lim z2lim];
 
 figure('Color', 'w', 'Name', 'Simulación de Traslado de Vaso - Ley Temporal', ...
@@ -347,6 +347,7 @@ plot3(Trayectoria_X, Trayectoria_Y, Trayectoria_Z, 'r-', 'LineWidth', 2);
 plot3(Trayectoria_X(1), Trayectoria_Y(1), Trayectoria_Z(1), 'g.', 'MarkerSize', 20); 
 
 axis equal;
+axis(WS);
 view(135, 25);
 
 disp('Animando trayectoria...');

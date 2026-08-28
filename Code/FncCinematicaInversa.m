@@ -35,4 +35,12 @@ q2 = atan2(Pz, r) - atan2(a3 * sin(q3), a2 + a3 * cos(q3));
 
 q_solucion = [q1, q2, q3];
 
+% Descontar los offsets articulares del robot para que (q_actuador + offset) sea igual al ángulo geométrico
+if isprop(Robot, 'offset') && ~isempty(Robot.offset)
+    q_solucion = q_solucion - Robot.offset(:)';
+end
+
+% Normalización al rango [-pi, pi]
+q_solucion = atan2(sin(q_solucion), cos(q_solucion));
+
 end

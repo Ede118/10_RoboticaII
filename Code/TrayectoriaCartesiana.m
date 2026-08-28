@@ -6,9 +6,9 @@ function [x, y, z, trayectorias] = TrayectoriaCartesiana(P0, graficar)
 % PARÁMETROS
 % =============================================================
 
-L = 0.10;      % Longitud recorrida por T1 y T4 [m]
-R = 0.025;      % Radio / amplitud [m]
-H = 2*R;       % Descenso total de T2 [m]
+L = 100;      % Longitud recorrida por T1 y T4 [mm]
+R = 25;       % Radio / amplitud [mm]
+H = 2*R;      % Descenso total de T2 [mm]
 
 N = 400;       % Cantidad de puntos por tramo
 
@@ -182,9 +182,9 @@ plot3( ...
     'MarkerSize',6 ...
 );
 
-xlabel('X [m]');
-ylabel('Y [m]');
-zlabel('Z [m]');
+xlabel('X [mm]');
+ylabel('Y [mm]');
+zlabel('Z [mm]');
 
 title('Trayectoria cartesiana completa');
 
@@ -231,8 +231,8 @@ plot(C2(1), C2(2), ...
     'LineWidth',2, ...
     'MarkerSize',10);
 
-xlabel('X [m]');
-ylabel('Y [m]');
+xlabel('X [mm]');
+ylabel('Y [mm]');
 
 title('Proyección sobre el plano XY');
 
@@ -262,8 +262,8 @@ plot(xT2, zT2, 'LineWidth',2);
 plot(xT3, zT3, 'LineWidth',2);
 plot(xT4, zT4, 'LineWidth',2);
 
-xlabel('X [m]');
-ylabel('Z [m]');
+xlabel('X [mm]');
+ylabel('Z [mm]');
 
 title('Proyección sobre el plano XZ');
 
@@ -284,8 +284,8 @@ plot(yT2, zT2, 'LineWidth',2);
 plot(yT3, zT3, 'LineWidth',2);
 plot(yT4, zT4, 'LineWidth',2);
 
-xlabel('Y [m]');
-ylabel('Z [m]');
+xlabel('Y [mm]');
+ylabel('Z [mm]');
 
 title('Proyección sobre el plano YZ');
 
