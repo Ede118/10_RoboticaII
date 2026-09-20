@@ -52,11 +52,11 @@ K(1,1) = sym(1)/2 * m1 * vc(:,1)' * vc(:,1);
 K(2,1) = 0.5 * w(:,1)' * I_c1 * w(:,1);      
 K(3,1) = K(1, 1) + K(2, 1);                  
 
-disp('omega_1 en {0}:'); disp(w(:,1)); %[output:30006ce4] %[output:77bea529]
-disp('v_c_1'); disp(vc(:,1)); %[output:7bf32629] %[output:7bf08550]
-disp('K1 lineal'); disp(K(1,1)); %[output:4a9c2d46] %[output:61f85703]
-disp('K1 rotacional'); disp(K(2,1)); %[output:1e7fea41] %[output:6dd8d755]
-disp('K1 total'); disp(K(3,1)); %[output:435fef61] %[output:54c612c2]
+disp('omega_1 en {0}:'); disp(w(:,1)); %[output:2db6dc2c] %[output:8dea2fb7]
+disp('v_c_1'); disp(vc(:,1)); %[output:51725f39] %[output:3c7f7e7f]
+disp('K1 lineal'); disp(K(1,1)); %[output:74f03d23] %[output:306771cb]
+disp('K1 rotacional'); disp(K(2,1)); %[output:759144e8] %[output:0782b9f1]
+disp('K1 total'); disp(K(3,1)); %[output:76afcc6d] %[output:6ed73920]
 %%
 %[text] ## Energía cinética $K\_2$
 % Velocidad angular relativa de 2 respecto de 1, expresada en {0}
@@ -67,11 +67,13 @@ w0(:,2) = simplificar(w0(:,1) + w21);
 % x2: longitudinal al eslabon
 % z2: eje de la articulacion 2
 % y2 = z2 x x2 para cerrar terna dextrógira
-x2 = [-cos(q1)*sin(q2);
+x2 = [...
+    -cos(q1)*sin(q2);
     -sin(q1)*sin(q2);
     cos(q2)];
 
-z2 = [ sin(q1);
+z2 = [...
+    sin(q1);
     -cos(q1);
     0];
 
@@ -92,12 +94,17 @@ vc(:,2) = simplificar(cross(w0(:,2), rO2C2));
 K(1,2) = simplificar(sym(1)/2 * m2 * (vc(:,2).' * vc(:,2)));
 K(2,2) = simplificar(sym(1)/2 * (wb(:,2).' * I_c2 * wb(:,2)));
 K(3,2) = simplificar(K(1,2) + K(2,2));
+
                 
-% Simplificación y reordenamiento de términos
-q_dot = [q_dot_1; q_dot_2];
-[best, A2] = simplifyCompact(K(3,2), 200);
-[best, ~] = quadraticCollect(best, q_dot);
-K(3,2) = best;
+% % Simplificación y reordenamiento de términos
+% q_dot = [q_dot_1; q_dot_2];
+% [best, A2] = simplifyCompact(K(3,2), 200);
+% [best, ~] = quadraticCollect(best, q_dot);
+% K(3,2) = best;
+
+% Ordenar K2 segun velocidades articulares
+q_dot_2vec = [q_dot_1; q_dot_2];
+[K(3,2), A2] = quadraticCollect(K(3,2), q_dot_2vec);
 
 % Expresion teorica esperada de K2 (tensor general en frame solidario)
 % derivada de la bibliografia
@@ -113,13 +120,20 @@ K2_ref = ...
 
 check_K2 = verificarCero(K(3,2) - K2_ref);
 
-disp('omega_2 en {0}:'); disp(w0(:,2)); %[output:5afcd529] %[output:951a5433]
-disp('omega_2 en frame solidario {2}:'); disp(wb(:,2)); %[output:21da127d] %[output:6a515821]
-disp('v_c_2'); disp(vc(:,2)); %[output:7341bb72] %[output:0bab4640]
-disp('K2 traslacional:'); disp(K(1,2)); %[output:67fa81d8] %[output:4bfdbac8]
-disp('K2 rotacional:'); disp(K(2,2)); %[output:61624bd3] %[output:4a396191]
-disp('K2 total ordenado:'); disp(K(3,2)); %[output:65251f6f] %[output:1d5af13d]
-disp('Chequeo K2 - K2_ref (debe ser 0):'); disp(check_K2); %[output:4b0871b6] %[output:8339c208]
+%[text] $\\omega\_2$ en el sistema $\\{S\_0\\}$
+disp(w0(:,2)); %[output:6e2146ee]
+%[text] $\\omega\_2$ en el sistema solidario $\\{S\_2\\}$
+disp(wb(:,2)); %[output:8f234988]
+%[text] $v\_{C\_2}$
+disp(vc(:,2)); %[output:8dbafc72]
+%[text] $K\_2$ traslacional
+disp(K(1,2)); %[output:8beec4c1]
+%[text] $K\_2$ rotacional
+disp(K(2,2)); %[output:451d162d]
+%[text] $K\_2$ total ordenado
+disp(K(3,2)); disp(latex(K(3,2))); %[output:4aa3cad5] %[output:79822bdf]
+%[text] Chequeo $K\_2 - K\_{2,\\text{ref}}$
+disp(check_K2); %[output:2de62887]
 %%
 %[text] ## Energía cinética $K\_3$
 % Eje 3 paralelo y con igual sentido que eje 2
@@ -187,50 +201,69 @@ K3_ref = ...
 
 check_K3 = verificarCero(K(3,3) - K3_ref);
 
-disp('omega_3 en {0}:'); disp(w0(:,3)); %[output:2848e350] %[output:454c30c4]
-disp('omega_3 en frame solidario {3}:'); disp(wb(:,3)); %[output:76dabcbd] %[output:73ef5ed9]
-disp('v_{O3}:'); disp(v_O3); %[output:733a687c] %[output:5d4d816b]
-disp('v_c_3:'); disp(vc(:,3)); %[output:359c9dbf] %[output:9252f871]
-disp('K3 traslacional:'); disp(K(1,3)); %[output:69e274e4] %[output:62745e20]
-disp('K3 rotacional:'); disp(K(2,3)); %[output:866b1500] %[output:37dafd57]
-disp('K3 total ordenado:'); disp(K(3,3)); %[output:25aa1212] %[output:9b011b1f]
-disp('Chequeo K3 - K3_ref (debe ser 0):'); disp(check_K3); %[output:8a3e050c] %[output:688de766]
+%[text] $\\omega\_3$ en el sistema $\\{S\_0\\}$
+disp(w0(:,3)); %[output:13b5f5aa]
+%[text] $\\omega\_3$ en el sistema solidario $\\{S\_3\\}$
+disp(wb(:,3)); %[output:9b2e8203]
+%[text] $v\_{O\_2}$
+disp(v_O3); %[output:40886320]
+%[text] $v\_{C\_2}$
+disp(vc(:,3)); %[output:65d806fa]
+%[text] $K\_3$ traslacional
+disp(K(1,3)); %[output:15a139b8]
+%[text] $K\_3$ rotacional
+disp(K(2,3)); %[output:073a6037]
+%[text] $K\_3$ total ordenado
+disp(K(3,3)); disp(latex(K(3,3))); %[output:7ae8189e] %[output:74708ae9]
+%[text] Chequeo $K\_3 - K\_{3,\\text{ref}}$
+disp(check_K3); %[output:0519236d]
 
 %%
 %[text] ## Energía Cinética Total $K$
-K_total = K(3,1) + K(3,2) + K(3,3);
-
 q_dot = [q_dot_1; q_dot_2; q_dot_3];
-[best, ranking] = simplifyCompact(K_total, 200);
-[K_total, A] = quadraticCollect(best, q_dot);
-
+K_total = simplificar(K(3,1) + K(3,2) + K(3,3));
+[K_total, A] = quadraticCollect(K_total, q_dot);
 
 % Matriz de inercia del robot: K = 1/2*qdot.'*M(q)*qdot
 M = hessian(K_total, q_dot);
 M = simplificarMatriz(M);
-
-disp('Energia cinetica total K:'); %[output:911ec97e]
-disp(K_total); %[output:9a910fd8]
-fprintf('\nLaTeX de K:\n%s\n', latex(K_total)); %[output:44d3d894]
-
-fprintf('\nMatriz de inercia M(q):\n'); %[output:9fa4849b]
-disp(M); %[output:5fd21027]
-fprintf('\nLaTeX de M(q):\n%s\n', latex(M)); %[output:608a565d]
+%[text] Energia cinética total $K\_\\text{total}$
+disp(K_total); disp(latex(K_total)); %[output:0627861c] %[output:28cc0848]
+%[text] Matriz de inercia $\\mathbf{M}(\\underline{q})$
+disp(M); disp(latex(M)); %[output:5fb14173] %[output:1b90dbce]
 
 % Coeficientes de la forma cuadratica K = qdot^T*A*qdot
 coef = {
-    'q_1^2',       A(1,1);
-    'q_2^2',       A(2,2);
-    'q_3^2',       A(3,3);
-    'q_2 q_3',   2*A(2,3)
+    'q_dot_1^2',       A(1,1);
+    'q_dot_2^2',       A(2,2);
+    'q_dot_3^2',       A(3,3);
+    'q_dot_1 q_dot_2', 2*A(1,2);
+    'q_dot_1 q_dot_3', 2*A(1,3);
+    'q_dot_2 q_dot_3', 2*A(2,3)
     };
 
-for k = 1:size(coef,1) %[output:group:0733b04f]
-    fprintf('\nCoeficiente de %s:\n', coef{k,1}); %[output:5929d911] %[output:6804be4b] %[output:34b23e0f] %[output:854b957e]
-    disp(coef{k,2}); %[output:8f618880] %[output:0ab08848] %[output:378cbabd] %[output:5a79efb7]
-    fprintf('LaTeX: %s\n', latex(coef{k,2})); %[output:673bbe1a] %[output:3414c340] %[output:753e059e] %[output:2f890b48]
+for k = 1:size(coef,1) %[output:group:70742dd7]
+    fprintf('\nCoeficiente de %s:\n', coef{k,1}); %[output:5da860fa] %[output:0928220f] %[output:6f412a29] %[output:0598359b] %[output:152394b3] %[output:9a81db9a]
+    disp(coef{k,2}); %[output:5403eb8f] %[output:71673c66] %[output:41f70f41] %[output:9856851f] %[output:80cd910e] %[output:94681b93]
+    fprintf('LaTeX: %s\n', latex(coef{k,2})); %[output:7b1e4103] %[output:474aaa01] %[output:0dd59a79] %[output:45ff9be2] %[output:3c8f4d56] %[output:3f456646]
+end %[output:group:70742dd7]
 
-end %[output:group:0733b04f]
+%[text] ### Caso particular: ejes principales de inercia
+% Si el frame solidario coincide con los ejes principales, los productos
+% de inercia se anulan.
+productos_inercia = [I_2_xy I_2_xz I_2_yz I_3_xy I_3_xz I_3_yz];
+ceros_productos   = zeros(1,6);
+
+K2_principal = simplificar(subs(K(3,2), productos_inercia, ceros_productos));
+K3_principal = simplificar(subs(K(3,3), productos_inercia, ceros_productos));
+K_principal  = simplificar(subs(K_total, productos_inercia, ceros_productos));
+%[text] Caso de Ejes Principales
+%[text] - $K\_2$ con productos de inercia nulos \
+disp(K2_principal); %[output:059e82df]
+%[text] - $K\_3$ con productos de inercia nulos \
+disp(K3_principal); %[output:968358ea]
+%[text] - $K\_{\\text{total}}$ con productos de inercia nulos \
+disp(K_principal); %[output:249b1dc6]
 %[text] ## FUNCIONES AUXILIARES
 function expr = simplificar(expr)
 % Simplificacion pensada para conservar expresiones trigonometricas compactas.
@@ -294,177 +327,159 @@ end
 %[metadata:view]
 %   data: {"layout":"inline"}
 %---
-%[output:30006ce4]
+%[output:2db6dc2c]
 %   data: {"dataType":"text","outputData":{"text":"omega_1 en {0}:\n","truncated":false}}
 %---
-%[output:77bea529]
+%[output:8dea2fb7]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n0\\\\\n0\\\\\n{\\dot{q} }_1 \n\\end{array}\\right)"}}
 %---
-%[output:7bf32629]
+%[output:51725f39]
 %   data: {"dataType":"text","outputData":{"text":"v_c_1\n","truncated":false}}
 %---
-%[output:7bf08550]
+%[output:3c7f7e7f]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n0\\\\\n0\\\\\n0\n\\end{array}\\right)"}}
 %---
-%[output:4a9c2d46]
+%[output:74f03d23]
 %   data: {"dataType":"text","outputData":{"text":"K1 lineal\n","truncated":false}}
 %---
-%[output:61f85703]
+%[output:306771cb]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"0"}}
 %---
-%[output:1e7fea41]
+%[output:759144e8]
 %   data: {"dataType":"text","outputData":{"text":"K1 rotacional\n","truncated":false}}
 %---
-%[output:6dd8d755]
+%[output:0782b9f1]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{I_{1,\\textrm{zz}} \\,{{\\dot{q} }_1 }^2 }{2}"}}
 %---
-%[output:435fef61]
+%[output:76afcc6d]
 %   data: {"dataType":"text","outputData":{"text":"K1 total\n","truncated":false}}
 %---
-%[output:54c612c2]
+%[output:6ed73920]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{I_{1,\\textrm{zz}} \\,{{\\dot{q} }_1 }^2 }{2}"}}
 %---
-%[output:5afcd529]
-%   data: {"dataType":"text","outputData":{"text":"omega_2 en {0}:\n","truncated":false}}
+%[output:6e2146ee]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n{\\dot{q} }_2 \\,\\sin \\left(q_1 \\right)\\\\\n-{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\\\\n{\\dot{q} }_1 \n\\end{array}\\right)"}}
 %---
-%[output:951a5433]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n{\\dot{q} }_2 \\,\\sin \\left(q_1 \\right)\\\\\n-{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\\\\n0\n\\end{array}\\right)"}}
+%[output:8f234988]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n{\\dot{q} }_1 \\,\\cos \\left(q_2 \\right)\\\\\n-{\\dot{q} }_1 \\,\\sin \\left(q_2 \\right)\\\\\n{\\dot{q} }_2 \n\\end{array}\\right)"}}
 %---
-%[output:21da127d]
-%   data: {"dataType":"text","outputData":{"text":"omega_2 en frame solidario {2}:\n","truncated":false}}
+%[output:8dbafc72]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\nl_{c,2} \\,{\\dot{q} }_1 \\,\\sin \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)-l_{c,2} \\,{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)\\\\\n-l_{c,2} \\,{\\dot{q} }_1 \\,\\cos \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)-l_{c,2} \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_1 \\right)\\\\\n-l_{c,2} \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)\n\\end{array}\\right)"}}
 %---
-%[output:6a515821]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n0\\\\\n0\\\\\n{\\dot{q} }_2 \n\\end{array}\\right)"}}
+%[output:8beec4c1]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{{l_{c,2} }^2 \\,m_2 \\,{\\left({{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 +{{\\dot{q} }_2 }^2 \\right)}}{2}"}}
 %---
-%[output:7341bb72]
-%   data: {"dataType":"text","outputData":{"text":"v_c_2\n","truncated":false}}
+%[output:451d162d]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{I_{2,\\textrm{zz}} \\,{{\\dot{q} }_2 }^2 }{2}-\\frac{I_{2,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 \\,{\\left({\\sin \\left(q_2 \\right)}^2 -1\\right)}}{2}-\\frac{I_{2,\\textrm{xy}} \\,{{\\dot{q} }_1 }^2 \\,\\sin \\left(2\\,q_2 \\right)}{2}+\\frac{I_{2,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}-I_{2,\\textrm{yz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)-I_{2,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,{\\left(2\\,{\\sin \\left(\\frac{q_2 }{2}\\right)}^2 -1\\right)}"}}
 %---
-%[output:0bab4640]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n-l_{c,2} \\,{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)\\\\\n-l_{c,2} \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_1 \\right)\\\\\n-l_{c,2} \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)\n\\end{array}\\right)"}}
+%[output:4aa3cad5]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n{\\left(\\frac{I_{2,\\textrm{yy}} }{4}+\\frac{{l_{c,2} }^2 \\,m_2 }{4}-\\frac{I_{2,\\textrm{yy}} \\,\\sigma_1 }{4}+\\frac{I_{2,\\textrm{xx}} \\,{\\cos \\left(q_2 \\right)}^2 }{2}-I_{2,\\textrm{xy}} \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_2 \\right)-\\frac{{l_{c,2} }^2 \\,m_2 \\,\\sigma_1 }{4}\\right)}\\,{{\\dot{q} }_1 }^2 +{\\left(I_{2,\\textrm{xz}} \\,\\cos \\left(q_2 \\right)-I_{2,\\textrm{yz}} \\,\\sin \\left(q_2 \\right)\\right)}\\,{\\dot{q} }_1 \\,{\\dot{q} }_2 +{\\left(\\frac{m_2 \\,{l_{c,2} }^2 }{2}+\\frac{I_{2,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_2 }^2 \\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 =2\\,{\\cos \\left(q_2 \\right)}^2 -1\n\\end{array}"}}
 %---
-%[output:67fa81d8]
-%   data: {"dataType":"text","outputData":{"text":"K2 traslacional:\n","truncated":false}}
+%[output:79822bdf]
+%   data: {"dataType":"text","outputData":{"text":"\\left(\\frac{I_{2,\\mathrm{yy}}}{4}+\\frac{{l_{c,2}}^2\\,m_{2}}{4}-\\frac{I_{2,\\mathrm{yy}}\\,\\left(2\\,{\\cos\\left(q_{2}\\right)}^2-1\\right)}{4}+\\frac{I_{2,\\mathrm{xx}}\\,{\\cos\\left(q_{2}\\right)}^2}{2}-I_{2,\\mathrm{xy}}\\,\\cos\\left(q_{2}\\right)\\,\\sin\\left(q_{2}\\right)-\\frac{{l_{c,2}}^2\\,m_{2}\\,\\left(2\\,{\\cos\\left(q_{2}\\right)}^2-1\\right)}{4}\\right)\\,{\\dot{q}_{1}}^2+\\left(I_{2,\\mathrm{xz}}\\,\\cos\\left(q_{2}\\right)-I_{2,\\mathrm{yz}}\\,\\sin\\left(q_{2}\\right)\\right)\\,\\dot{q}_{1}\\,\\dot{q}_{2}+\\left(\\frac{m_{2}\\,{l_{c,2}}^2}{2}+\\frac{I_{2,\\mathrm{zz}}}{2}\\right)\\,{\\dot{q}_{2}}^2\n","truncated":false}}
 %---
-%[output:4bfdbac8]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{{l_{c,2} }^2 \\,m_2 \\,{{\\dot{q} }_2 }^2 }{2}"}}
+%[output:2de62887]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"0"}}
 %---
-%[output:61624bd3]
-%   data: {"dataType":"text","outputData":{"text":"K2 rotacional:\n","truncated":false}}
+%[output:13b5f5aa]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n\\sin \\left(q_1 \\right)\\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}\\\\\n-\\cos \\left(q_1 \\right)\\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}\\\\\n{\\dot{q} }_1 \n\\end{array}\\right)"}}
 %---
-%[output:4a396191]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{I_{2,\\textrm{zz}} \\,{{\\dot{q} }_2 }^2 }{2}"}}
+%[output:9b2e8203]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n{\\dot{q} }_1 \\,\\cos \\left(q_2 +q_3 \\right)\\\\\n-{\\dot{q} }_1 \\,\\sin \\left(q_2 +q_3 \\right)\\\\\n{\\dot{q} }_2 +{\\dot{q} }_3 \n\\end{array}\\right)"}}
 %---
-%[output:65251f6f]
-%   data: {"dataType":"text","outputData":{"text":"K2 total ordenado:\n","truncated":false}}
+%[output:40886320]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\nL_2 \\,{\\dot{q} }_1 \\,\\sin \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)-L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)\\\\\n-L_2 \\,{\\dot{q} }_1 \\,\\cos \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)-L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_1 \\right)\\\\\n-L_2 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)\n\\end{array}\\right)"}}
 %---
-%[output:1d5af13d]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{{{\\dot{q} }_2 }^2 \\,{\\left(m_2 \\,{l_{c,2} }^2 +I_{2,\\textrm{zz}} \\right)}}{2}"}}
+%[output:65d806fa]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\nL_2 \\,{\\dot{q} }_1 \\,\\sin \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)-L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)-l_{c,3} \\,{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)\\,\\cos \\left(q_3 \\right)-l_{c,3} \\,{\\dot{q} }_3 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)\\,\\cos \\left(q_3 \\right)+l_{c,3} \\,{\\dot{q} }_1 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_1 \\right)\\,\\sin \\left(q_3 \\right)+l_{c,3} \\,{\\dot{q} }_1 \\,\\cos \\left(q_3 \\right)\\,\\sin \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)+l_{c,3} \\,{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)\\,\\sin \\left(q_3 \\right)+l_{c,3} \\,{\\dot{q} }_3 \\,\\cos \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)\\,\\sin \\left(q_3 \\right)\\\\\nl_{c,3} \\,{\\dot{q} }_2 \\,\\sin \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)\\,\\sin \\left(q_3 \\right)-L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_1 \\right)-l_{c,3} \\,{\\dot{q} }_1 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_3 \\right)-l_{c,3} \\,{\\dot{q} }_1 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_3 \\right)\\,\\sin \\left(q_2 \\right)-l_{c,3} \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\,\\cos \\left(q_3 \\right)\\,\\sin \\left(q_1 \\right)-l_{c,3} \\,{\\dot{q} }_3 \\,\\cos \\left(q_2 \\right)\\,\\cos \\left(q_3 \\right)\\,\\sin \\left(q_1 \\right)-L_2 \\,{\\dot{q} }_1 \\,\\cos \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)+l_{c,3} \\,{\\dot{q} }_3 \\,\\sin \\left(q_1 \\right)\\,\\sin \\left(q_2 \\right)\\,\\sin \\left(q_3 \\right)\\\\\n-L_2 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)-l_{c,3} \\,\\sin \\left(q_2 +q_3 \\right)\\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}\n\\end{array}\\right)"}}
 %---
-%[output:4b0871b6]
-%   data: {"dataType":"text","outputData":{"text":"Chequeo K2 - K2_ref (debe ser 0):\n","truncated":false}}
+%[output:15a139b8]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{m_3 \\,{\\left({L_2 }^2 \\,{{\\dot{q} }_1 }^2 +2\\,{L_2 }^2 \\,{{\\dot{q} }_2 }^2 +{l_{c,3} }^2 \\,{{\\dot{q} }_1 }^2 +2\\,{l_{c,3} }^2 \\,{{\\dot{q} }_2 }^2 +2\\,{l_{c,3} }^2 \\,{{\\dot{q} }_3 }^2 +4\\,{l_{c,3} }^2 \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 -{L_2 }^2 \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(2\\,q_2 \\right)-{l_{c,3} }^2 \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(2\\,q_2 +2\\,q_3 \\right)+2\\,L_2 \\,l_{c,3} \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(q_3 \\right)+4\\,L_2 \\,l_{c,3} \\,{{\\dot{q} }_2 }^2 \\,\\cos \\left(q_3 \\right)-2\\,L_2 \\,l_{c,3} \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(2\\,q_2 +q_3 \\right)+4\\,L_2 \\,l_{c,3} \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 \\,\\cos \\left(q_3 \\right)\\right)}}{4}"}}
 %---
-%[output:8339c208]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"-\\frac{m_2 \\,{l_{c,2} }^2 \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}-\\frac{I_{2,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 \\,{\\cos \\left(q_2 \\right)}^2 }{2}+I_{2,\\textrm{xy}} \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_2 \\right)-\\frac{I_{2,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}-I_{2,\\textrm{xz}} \\,{\\dot{q} }_2 \\,{\\dot{q} }_1 \\,\\cos \\left(q_2 \\right)+I_{2,\\textrm{yz}} \\,{\\dot{q} }_2 \\,{\\dot{q} }_1 \\,\\sin \\left(q_2 \\right)"}}
+%[output:073a6037]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}\\,{\\left(I_{3,\\textrm{zz}} \\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}+I_{3,\\textrm{xz}} \\,{\\dot{q} }_1 \\,\\cos \\left(q_2 +q_3 \\right)-I_{3,\\textrm{yz}} \\,{\\dot{q} }_1 \\,\\sin \\left(q_2 +q_3 \\right)\\right)}}{2}+\\frac{{\\dot{q} }_1 \\,\\cos \\left(q_2 +q_3 \\right)\\,{\\left(I_{3,\\textrm{xz}} \\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}+I_{3,\\textrm{xx}} \\,{\\dot{q} }_1 \\,\\cos \\left(q_2 +q_3 \\right)-I_{3,\\textrm{xy}} \\,{\\dot{q} }_1 \\,\\sin \\left(q_2 +q_3 \\right)\\right)}}{2}-\\frac{{\\dot{q} }_1 \\,\\sin \\left(q_2 +q_3 \\right)\\,{\\left(I_{3,\\textrm{yz}} \\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}+I_{3,\\textrm{xy}} \\,{\\dot{q} }_1 \\,\\cos \\left(q_2 +q_3 \\right)-I_{3,\\textrm{yy}} \\,{\\dot{q} }_1 \\,\\sin \\left(q_2 +q_3 \\right)\\right)}}{2}"}}
 %---
-%[output:2848e350]
-%   data: {"dataType":"text","outputData":{"text":"omega_3 en {0}:\n","truncated":false}}
+%[output:7ae8189e]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n{\\left(\\frac{I_{3,\\textrm{xx}} }{4}+\\frac{I_{3,\\textrm{yy}} }{4}+\\frac{I_{3,\\textrm{xx}} \\,\\cos \\left(\\sigma_2 \\right)}{4}-\\frac{I_{3,\\textrm{yy}} \\,\\cos \\left(\\sigma_2 \\right)}{4}-\\frac{I_{3,\\textrm{xy}} \\,\\sin \\left(\\sigma_2 \\right)}{2}+\\frac{{L_2 }^2 \\,m_3 }{4}+\\frac{{l_{c,3} }^2 \\,m_3 }{4}-\\frac{{L_2 }^2 \\,m_3 \\,\\cos \\left(2\\,q_2 \\right)}{4}-\\frac{{l_{c,3} }^2 \\,m_3 \\,\\cos \\left(\\sigma_2 \\right)}{4}+\\frac{L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(q_3 \\right)}{2}-\\frac{L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(2\\,q_2 +q_3 \\right)}{2}\\right)}\\,{{\\dot{q} }_1 }^2 +\\sigma_1 \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 +\\sigma_1 \\,{\\dot{q} }_1 \\,{\\dot{q} }_3 +{\\left(\\frac{I_{3,\\textrm{zz}} }{2}+\\frac{m_3 \\,{\\left(4\\,{L_2 }^2 +8\\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} +4\\,{l_{c,3} }^2 \\right)}}{8}\\right)}\\,{{\\dot{q} }_2 }^2 +{\\left(I_{3,\\textrm{zz}} +\\frac{m_3 \\,{\\left(4\\,{l_{c,3} }^2 +4\\,L_2 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} \\right)}}{4}\\right)}\\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +{\\left(\\frac{m_3 \\,{l_{c,3} }^2 }{2}+\\frac{I_{3,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_3 }^2 \\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 =I_{3,\\textrm{xz}} \\,\\cos \\left(q_2 +q_3 \\right)-I_{3,\\textrm{yz}} \\,\\sin \\left(q_2 +q_3 \\right)\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_2 =2\\,q_2 +2\\,q_3 \n\\end{array}"}}
 %---
-%[output:454c30c4]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n\\sin \\left(q_1 \\right)\\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}\\\\\n-\\cos \\left(q_1 \\right)\\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}\\\\\n0\n\\end{array}\\right)"}}
+%[output:74708ae9]
+%   data: {"dataType":"text","outputData":{"text":"\\left(\\frac{I_{3,\\mathrm{xx}}}{4}+\\frac{I_{3,\\mathrm{yy}}}{4}+\\frac{I_{3,\\mathrm{xx}}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}-\\frac{I_{3,\\mathrm{yy}}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}-\\frac{I_{3,\\mathrm{xy}}\\,\\sin\\left(2\\,q_{2}+2\\,q_{3}\\right)}{2}+\\frac{{L_{2}}^2\\,m_{3}}{4}+\\frac{{l_{c,3}}^2\\,m_{3}}{4}-\\frac{{L_{2}}^2\\,m_{3}\\,\\cos\\left(2\\,q_{2}\\right)}{4}-\\frac{{l_{c,3}}^2\\,m_{3}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}+\\frac{L_{2}\\,l_{c,3}\\,m_{3}\\,\\cos\\left(q_{3}\\right)}{2}-\\frac{L_{2}\\,l_{c,3}\\,m_{3}\\,\\cos\\left(2\\,q_{2}+q_{3}\\right)}{2}\\right)\\,{\\dot{q}_{1}}^2+\\left(I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right)\\right)\\,\\dot{q}_{1}\\,\\dot{q}_{2}+\\left(I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right)\\right)\\,\\dot{q}_{1}\\,\\dot{q}_{3}+\\left(\\frac{I_{3,\\mathrm{zz}}}{2}+\\frac{m_{3}\\,\\left(4\\,{L_{2}}^2+8\\,\\cos\\left(q_{3}\\right)\\,L_{2}\\,l_{c,3}+4\\,{l_{c,3}}^2\\right)}{8}\\right)\\,{\\dot{q}_{2}}^2+\\left(I_{3,\\mathrm{zz}}+\\frac{m_{3}\\,\\left(4\\,{l_{c,3}}^2+4\\,L_{2}\\,\\cos\\left(q_{3}\\right)\\,l_{c,3}\\right)}{4}\\right)\\,\\dot{q}_{2}\\,\\dot{q}_{3}+\\left(\\frac{m_{3}\\,{l_{c,3}}^2}{2}+\\frac{I_{3,\\mathrm{zz}}}{2}\\right)\\,{\\dot{q}_{3}}^2\n","truncated":false}}
 %---
-%[output:76dabcbd]
-%   data: {"dataType":"text","outputData":{"text":"omega_3 en frame solidario {3}:\n","truncated":false}}
+%[output:0519236d]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"0"}}
 %---
-%[output:73ef5ed9]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n0\\\\\n0\\\\\n{\\dot{q} }_2 +{\\dot{q} }_3 \n\\end{array}\\right)"}}
+%[output:0627861c]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n\\frac{I_{3,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 }{4}+\\frac{I_{2,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 }{4}+\\frac{I_{1,\\textrm{zz}} \\,{{\\dot{q} }_1 }^2 }{2}+\\frac{I_{3,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 }{4}+\\frac{I_{2,\\textrm{zz}} \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{I_{3,\\textrm{zz}} \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{I_{3,\\textrm{zz}} \\,{{\\dot{q} }_3 }^2 }{2}+\\frac{{L_2 }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 }{4}+\\frac{{L_2 }^2 \\,m_3 \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{{l_{c,2} }^2 \\,m_2 \\,{{\\dot{q} }_1 }^2 }{4}+\\frac{{l_{c,2} }^2 \\,m_2 \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 }{4}+\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_3 }^2 }{2}+I_{3,\\textrm{zz}} \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 -\\frac{I_{2,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(2\\,q_2 \\right)}{4}+\\frac{I_{2,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 \\,{\\cos \\left(q_2 \\right)}^2 }{2}+\\frac{I_{3,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(\\sigma_1 \\right)}{4}-\\frac{I_{3,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(\\sigma_1 \\right)}{4}-\\frac{I_{3,\\textrm{xy}} \\,{{\\dot{q} }_1 }^2 \\,\\sin \\left(\\sigma_1 \\right)}{2}+I_{3,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 +q_3 \\right)+I_{3,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_3 \\,\\cos \\left(q_2 +q_3 \\right)-I_{2,\\textrm{xy}} \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_2 \\right)-I_{3,\\textrm{yz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 +q_3 \\right)-I_{3,\\textrm{yz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_3 \\,\\sin \\left(q_2 +q_3 \\right)+I_{2,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)-I_{2,\\textrm{yz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)+{l_{c,3} }^2 \\,m_3 \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 -\\frac{{L_2 }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(2\\,q_2 \\right)}{4}-\\frac{{l_{c,2} }^2 \\,m_2 \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(2\\,q_2 \\right)}{4}-\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(\\sigma_1 \\right)}{4}+\\frac{L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(q_3 \\right)}{2}+L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_2 }^2 \\,\\cos \\left(q_3 \\right)-\\frac{L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,\\cos \\left(2\\,q_2 +q_3 \\right)}{2}+L_2 \\,l_{c,3} \\,m_3 \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 \\,\\cos \\left(q_3 \\right)\\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 =2\\,q_2 +2\\,q_3 \n\\end{array}"}}
 %---
-%[output:733a687c]
-%   data: {"dataType":"text","outputData":{"text":"v_{O3}:\n","truncated":false}}
+%[output:28cc0848]
+%   data: {"dataType":"text","outputData":{"text":"\\frac{I_{3,\\mathrm{xx}}\\,{\\dot{q}_{1}}^2}{4}+\\frac{I_{2,\\mathrm{yy}}\\,{\\dot{q}_{1}}^2}{4}+\\frac{I_{1,\\mathrm{zz}}\\,{\\dot{q}_{1}}^2}{2}+\\frac{I_{3,\\mathrm{yy}}\\,{\\dot{q}_{1}}^2}{4}+\\frac{I_{2,\\mathrm{zz}}\\,{\\dot{q}_{2}}^2}{2}+\\frac{I_{3,\\mathrm{zz}}\\,{\\dot{q}_{2}}^2}{2}+\\frac{I_{3,\\mathrm{zz}}\\,{\\dot{q}_{3}}^2}{2}+\\frac{{L_{2}}^2\\,m_{3}\\,{\\dot{q}_{1}}^2}{4}+\\frac{{L_{2}}^2\\,m_{3}\\,{\\dot{q}_{2}}^2}{2}+\\frac{{l_{c,2}}^2\\,m_{2}\\,{\\dot{q}_{1}}^2}{4}+\\frac{{l_{c,2}}^2\\,m_{2}\\,{\\dot{q}_{2}}^2}{2}+\\frac{{l_{c,3}}^2\\,m_{3}\\,{\\dot{q}_{1}}^2}{4}+\\frac{{l_{c,3}}^2\\,m_{3}\\,{\\dot{q}_{2}}^2}{2}+\\frac{{l_{c,3}}^2\\,m_{3}\\,{\\dot{q}_{3}}^2}{2}+I_{3,\\mathrm{zz}}\\,\\dot{q}_{2}\\,\\dot{q}_{3}-\\frac{I_{2,\\mathrm{yy}}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(2\\,q_{2}\\right)}{4}+\\frac{I_{2,\\mathrm{xx}}\\,{\\dot{q}_{1}}^2\\,{\\cos\\left(q_{2}\\right)}^2}{2}+\\frac{I_{3,\\mathrm{xx}}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}-\\frac{I_{3,\\mathrm{yy}}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}-\\frac{I_{3,\\mathrm{xy}}\\,{\\dot{q}_{1}}^2\\,\\sin\\left(2\\,q_{2}+2\\,q_{3}\\right)}{2}+I_{3,\\mathrm{xz}}\\,\\dot{q}_{1}\\,\\dot{q}_{2}\\,\\cos\\left(q_{2}+q_{3}\\right)+I_{3,\\mathrm{xz}}\\,\\dot{q}_{1}\\,\\dot{q}_{3}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{2,\\mathrm{xy}}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(q_{2}\\right)\\,\\sin\\left(q_{2}\\right)-I_{3,\\mathrm{yz}}\\,\\dot{q}_{1}\\,\\dot{q}_{2}\\,\\sin\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\dot{q}_{1}\\,\\dot{q}_{3}\\,\\sin\\left(q_{2}+q_{3}\\right)+I_{2,\\mathrm{xz}}\\,\\dot{q}_{1}\\,\\dot{q}_{2}\\,\\cos\\left(q_{2}\\right)-I_{2,\\mathrm{yz}}\\,\\dot{q}_{1}\\,\\dot{q}_{2}\\,\\sin\\left(q_{2}\\right)+{l_{c,3}}^2\\,m_{3}\\,\\dot{q}_{2}\\,\\dot{q}_{3}-\\frac{{L_{2}}^2\\,m_{3}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(2\\,q_{2}\\right)}{4}-\\frac{{l_{c,2}}^2\\,m_{2}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(2\\,q_{2}\\right)}{4}-\\frac{{l_{c,3}}^2\\,m_{3}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}+\\frac{L_{2}\\,l_{c,3}\\,m_{3}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(q_{3}\\right)}{2}+L_{2}\\,l_{c,3}\\,m_{3}\\,{\\dot{q}_{2}}^2\\,\\cos\\left(q_{3}\\right)-\\frac{L_{2}\\,l_{c,3}\\,m_{3}\\,{\\dot{q}_{1}}^2\\,\\cos\\left(2\\,q_{2}+q_{3}\\right)}{2}+L_{2}\\,l_{c,3}\\,m_{3}\\,\\dot{q}_{2}\\,\\dot{q}_{3}\\,\\cos\\left(q_{3}\\right)\n","truncated":false}}
 %---
-%[output:5d4d816b]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n-L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_1 \\right)\\,\\cos \\left(q_2 \\right)\\\\\n-L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\,\\sin \\left(q_1 \\right)\\\\\n-L_2 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)\n\\end{array}\\right)"}}
+%[output:5fb14173]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n\\left(\\begin{array}{ccc}\n\\frac{I_{3,\\textrm{xx}} }{2}+I_{1,\\textrm{zz}} +\\frac{I_{3,\\textrm{yy}} }{2}+\\frac{I_{3,\\textrm{xx}} \\,\\cos \\left(\\sigma_2 \\right)}{2}-\\frac{I_{3,\\textrm{yy}} \\,\\cos \\left(\\sigma_2 \\right)}{2}-I_{3,\\textrm{xy}} \\,\\sin \\left(\\sigma_2 \\right)+{L_2 }^2 \\,m_3 +{l_{c,2} }^2 \\,m_2 +\\frac{{l_{c,3} }^2 \\,m_3 }{2}-I_{2,\\textrm{yy}} \\,{\\left(\\frac{\\cos \\left(2\\,q_2 \\right)}{2}-\\frac{1}{2}\\right)}+I_{2,\\textrm{xx}} \\,{\\cos \\left(q_2 \\right)}^2 -I_{2,\\textrm{xy}} \\,\\sin \\left(2\\,q_2 \\right)-{L_2 }^2 \\,m_3 \\,{\\cos \\left(q_2 \\right)}^2 -{l_{c,2} }^2 \\,m_2 \\,{\\cos \\left(q_2 \\right)}^2 -\\frac{{l_{c,3} }^2 \\,m_3 \\,\\cos \\left(\\sigma_2 \\right)}{2}+L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(q_3 \\right)-L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(2\\,q_2 +q_3 \\right) & \\sigma_3  & \\sigma_5 -\\sigma_4 \\\\\n\\sigma_3  & m_3 \\,{L_2 }^2 +2\\,m_3 \\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} +m_2 \\,{l_{c,2} }^2 +m_3 \\,{l_{c,3} }^2 +I_{2,\\textrm{zz}} +I_{3,\\textrm{zz}}  & \\sigma_1 \\\\\n\\sigma_5 -\\sigma_4  & \\sigma_1  & m_3 \\,{l_{c,3} }^2 +I_{3,\\textrm{zz}} \n\\end{array}\\right)\\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 =m_3 \\,{l_{c,3} }^2 +L_2 \\,m_3 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} +I_{3,\\textrm{zz}} \\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_2 =2\\,q_2 +2\\,q_3 \\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_3 =\\sigma_5 -\\sigma_4 +I_{2,\\textrm{xz}} \\,\\cos \\left(q_2 \\right)-I_{2,\\textrm{yz}} \\,\\sin \\left(q_2 \\right)\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_4 =I_{3,\\textrm{yz}} \\,\\sin \\left(q_2 +q_3 \\right)\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_5 =I_{3,\\textrm{xz}} \\,\\cos \\left(q_2 +q_3 \\right)\n\\end{array}"}}
 %---
-%[output:359c9dbf]
-%   data: {"dataType":"text","outputData":{"text":"v_c_3:\n","truncated":false}}
+%[output:1b90dbce]
+%   data: {"dataType":"text","outputData":{"text":"\\left(\\begin{array}{ccc} \\frac{I_{3,\\mathrm{xx}}}{2}+I_{1,\\mathrm{zz}}+\\frac{I_{3,\\mathrm{yy}}}{2}+\\frac{I_{3,\\mathrm{xx}}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{2}-\\frac{I_{3,\\mathrm{yy}}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{2}-I_{3,\\mathrm{xy}}\\,\\sin\\left(2\\,q_{2}+2\\,q_{3}\\right)+{L_{2}}^2\\,m_{3}+{l_{c,2}}^2\\,m_{2}+\\frac{{l_{c,3}}^2\\,m_{3}}{2}-I_{2,\\mathrm{yy}}\\,\\left(\\frac{\\cos\\left(2\\,q_{2}\\right)}{2}-\\frac{1}{2}\\right)+I_{2,\\mathrm{xx}}\\,{\\cos\\left(q_{2}\\right)}^2-I_{2,\\mathrm{xy}}\\,\\sin\\left(2\\,q_{2}\\right)-{L_{2}}^2\\,m_{3}\\,{\\cos\\left(q_{2}\\right)}^2-{l_{c,2}}^2\\,m_{2}\\,{\\cos\\left(q_{2}\\right)}^2-\\frac{{l_{c,3}}^2\\,m_{3}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{2}+L_{2}\\,l_{c,3}\\,m_{3}\\,\\cos\\left(q_{3}\\right)-L_{2}\\,l_{c,3}\\,m_{3}\\,\\cos\\left(2\\,q_{2}+q_{3}\\right) & I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right)+I_{2,\\mathrm{xz}}\\,\\cos\\left(q_{2}\\right)-I_{2,\\mathrm{yz}}\\,\\sin\\left(q_{2}\\right) & I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right)\\\\ I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right)+I_{2,\\mathrm{xz}}\\,\\cos\\left(q_{2}\\right)-I_{2,\\mathrm{yz}}\\,\\sin\\left(q_{2}\\right) & m_{3}\\,{L_{2}}^2+2\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,L_{2}\\,l_{c,3}+m_{2}\\,{l_{c,2}}^2+m_{3}\\,{l_{c,3}}^2+I_{2,\\mathrm{zz}}+I_{3,\\mathrm{zz}} & m_{3}\\,{l_{c,3}}^2+L_{2}\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,l_{c,3}+I_{3,\\mathrm{zz}}\\\\ I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right) & m_{3}\\,{l_{c,3}}^2+L_{2}\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,l_{c,3}+I_{3,\\mathrm{zz}} & m_{3}\\,{l_{c,3}}^2+I_{3,\\mathrm{zz}} \\end{array}\\right)\n","truncated":false}}
 %---
-%[output:9252f871]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{c}\n-\\cos \\left(q_1 \\right)\\,{\\left(l_{c,3} \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 +q_3 \\right)+l_{c,3} \\,{\\dot{q} }_3 \\,\\cos \\left(q_2 +q_3 \\right)+L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\right)}\\\\\n-\\sin \\left(q_1 \\right)\\,{\\left(l_{c,3} \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 +q_3 \\right)+l_{c,3} \\,{\\dot{q} }_3 \\,\\cos \\left(q_2 +q_3 \\right)+L_2 \\,{\\dot{q} }_2 \\,\\cos \\left(q_2 \\right)\\right)}\\\\\n-L_2 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 \\right)-l_{c,3} \\,\\sin \\left(q_2 +q_3 \\right)\\,{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}\n\\end{array}\\right)"}}
+%[output:5da860fa]
+%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_dot_1^2:\n","truncated":false}}
 %---
-%[output:69e274e4]
-%   data: {"dataType":"text","outputData":{"text":"K3 traslacional:\n","truncated":false}}
+%[output:5403eb8f]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n\\frac{I_{3,\\textrm{xx}} }{4}+\\frac{I_{1,\\textrm{zz}} }{2}+\\frac{I_{3,\\textrm{yy}} }{4}+\\frac{I_{3,\\textrm{xx}} \\,\\cos \\left(\\sigma_1 \\right)}{4}-\\frac{I_{3,\\textrm{yy}} \\,\\cos \\left(\\sigma_1 \\right)}{4}-\\frac{I_{3,\\textrm{xy}} \\,\\sin \\left(\\sigma_1 \\right)}{2}+\\frac{{L_2 }^2 \\,m_3 }{2}+\\frac{{l_{c,2} }^2 \\,m_2 }{4}+\\frac{{l_{c,3} }^2 \\,m_3 }{4}-\\frac{I_{2,\\textrm{yy}} \\,{\\left(\\frac{\\cos \\left(2\\,q_2 \\right)}{2}-\\frac{1}{2}\\right)}}{2}+\\frac{I_{2,\\textrm{xx}} \\,{\\cos \\left(q_2 \\right)}^2 }{2}-\\frac{I_{2,\\textrm{xy}} \\,\\sin \\left(2\\,q_2 \\right)}{2}-\\frac{{L_2 }^2 \\,m_3 \\,{\\cos \\left(q_2 \\right)}^2 }{2}-\\frac{{l_{c,2} }^2 \\,m_2 \\,\\cos \\left(2\\,q_2 \\right)}{4}-\\frac{{l_{c,3} }^2 \\,m_3 \\,\\cos \\left(\\sigma_1 \\right)}{4}+\\frac{L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(q_3 \\right)}{2}-\\frac{L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(2\\,q_2 +q_3 \\right)}{2}\\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 =2\\,q_2 +2\\,q_3 \n\\end{array}"}}
 %---
-%[output:62745e20]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{m_3 \\,{\\left({L_2 }^2 \\,{{\\dot{q} }_2 }^2 +2\\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} \\,{{\\dot{q} }_2 }^2 +2\\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +{l_{c,3} }^2 \\,{{\\dot{q} }_2 }^2 +2\\,{l_{c,3} }^2 \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +{l_{c,3} }^2 \\,{{\\dot{q} }_3 }^2 \\right)}}{2}"}}
+%[output:7b1e4103]
+%   data: {"dataType":"text","outputData":{"text":"LaTeX: \\frac{I_{3,\\mathrm{xx}}}{4}+\\frac{I_{1,\\mathrm{zz}}}{2}+\\frac{I_{3,\\mathrm{yy}}}{4}+\\frac{I_{3,\\mathrm{xx}}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}-\\frac{I_{3,\\mathrm{yy}}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}-\\frac{I_{3,\\mathrm{xy}}\\,\\sin\\left(2\\,q_{2}+2\\,q_{3}\\right)}{2}+\\frac{{L_{2}}^2\\,m_{3}}{2}+\\frac{{l_{c,2}}^2\\,m_{2}}{4}+\\frac{{l_{c,3}}^2\\,m_{3}}{4}-\\frac{I_{2,\\mathrm{yy}}\\,\\left(\\frac{\\cos\\left(2\\,q_{2}\\right)}{2}-\\frac{1}{2}\\right)}{2}+\\frac{I_{2,\\mathrm{xx}}\\,{\\cos\\left(q_{2}\\right)}^2}{2}-\\frac{I_{2,\\mathrm{xy}}\\,\\sin\\left(2\\,q_{2}\\right)}{2}-\\frac{{L_{2}}^2\\,m_{3}\\,{\\cos\\left(q_{2}\\right)}^2}{2}-\\frac{{l_{c,2}}^2\\,m_{2}\\,\\cos\\left(2\\,q_{2}\\right)}{4}-\\frac{{l_{c,3}}^2\\,m_{3}\\,\\cos\\left(2\\,q_{2}+2\\,q_{3}\\right)}{4}+\\frac{L_{2}\\,l_{c,3}\\,m_{3}\\,\\cos\\left(q_{3}\\right)}{2}-\\frac{L_{2}\\,l_{c,3}\\,m_{3}\\,\\cos\\left(2\\,q_{2}+q_{3}\\right)}{2}\n","truncated":false}}
 %---
-%[output:866b1500]
-%   data: {"dataType":"text","outputData":{"text":"K3 rotacional:\n","truncated":false}}
+%[output:0928220f]
+%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_dot_2^2:\n","truncated":false}}
 %---
-%[output:37dafd57]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{I_{3,\\textrm{zz}} \\,{{\\left({\\dot{q} }_2 +{\\dot{q} }_3 \\right)}}^2 }{2}"}}
-%---
-%[output:25aa1212]
-%   data: {"dataType":"text","outputData":{"text":"K3 total ordenado:\n","truncated":false}}
-%---
-%[output:9b011b1f]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"{\\left(\\frac{m_3 \\,{L_2 }^2 }{2}+m_3 \\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} +\\frac{m_3 \\,{l_{c,3} }^2 }{2}+\\frac{I_{3,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_2 }^2 +{\\left(m_3 \\,{l_{c,3} }^2 +L_2 \\,m_3 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} +I_{3,\\textrm{zz}} \\right)}\\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +{\\left(\\frac{m_3 \\,{l_{c,3} }^2 }{2}+\\frac{I_{3,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_3 }^2"}}
-%---
-%[output:8a3e050c]
-%   data: {"dataType":"text","outputData":{"text":"Chequeo K3 - K3_ref (debe ser 0):\n","truncated":false}}
-%---
-%[output:688de766]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n\\frac{I_{3,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 \\,\\sigma_1 }{2}-I_{3,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 -I_{3,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_3 -\\frac{I_{3,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 }{2}-\\frac{I_{3,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 \\,\\sigma_1 }{2}+\\frac{I_{3,\\textrm{xy}} \\,{{\\dot{q} }_1 }^2 \\,\\sin \\left(2\\,q_2 +2\\,q_3 \\right)}{2}+I_{3,\\textrm{yz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,\\sin \\left(q_2 +q_3 \\right)+I_{3,\\textrm{yz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_3 \\,\\sin \\left(q_2 +q_3 \\right)+2\\,I_{3,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_2 \\,\\sigma_2 +2\\,I_{3,\\textrm{xz}} \\,{\\dot{q} }_1 \\,{\\dot{q} }_3 \\,\\sigma_2 -\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,\\sigma_1 }{2}-\\frac{{L_2 }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}-L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 +\\frac{q_3 }{2}\\right)}^2 +L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(\\frac{q_3 }{2}\\right)}^2 \\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 ={\\sin \\left(q_2 +q_3 \\right)}^2 \\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_2 ={\\sin \\left(\\frac{q_2 }{2}+\\frac{q_3 }{2}\\right)}^2 \n\\end{array}"}}
-%---
-%[output:911ec97e]
-%   data: {"dataType":"text","outputData":{"text":"Energia cinetica total K:\n","truncated":false}}
-%---
-%[output:9a910fd8]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n\\frac{I_{1,\\textrm{zz}} \\,{{\\dot{q} }_1 }^2 }{2}+{\\left(\\frac{m_3 \\,{L_2 }^2 }{2}+m_3 \\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} +\\frac{m_2 \\,{l_{c,2} }^2 }{2}+\\sigma_1 +\\frac{I_{2,\\textrm{zz}} }{2}+\\frac{I_{3,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_2 }^2 +{\\left(m_3 \\,{l_{c,3} }^2 +L_2 \\,m_3 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} +I_{3,\\textrm{zz}} \\right)}\\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +{\\left(\\sigma_1 +\\frac{I_{3,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_3 }^2 \\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 =\\frac{m_3 \\,{l_{c,3} }^2 }{2}\n\\end{array}"}}
-%---
-%[output:44d3d894]
-%   data: {"dataType":"text","outputData":{"text":"\nLaTeX de K:\n\\frac{I_{1,\\mathrm{zz}}\\,{\\dot{q}_{1}}^2}{2}+\\left(\\frac{m_{3}\\,{L_{2}}^2}{2}+m_{3}\\,\\cos\\left(q_{3}\\right)\\,L_{2}\\,l_{c,3}+\\frac{m_{2}\\,{l_{c,2}}^2}{2}+\\frac{m_{3}\\,{l_{c,3}}^2}{2}+\\frac{I_{2,\\mathrm{zz}}}{2}+\\frac{I_{3,\\mathrm{zz}}}{2}\\right)\\,{\\dot{q}_{2}}^2+\\left(m_{3}\\,{l_{c,3}}^2+L_{2}\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,l_{c,3}+I_{3,\\mathrm{zz}}\\right)\\,\\dot{q}_{2}\\,\\dot{q}_{3}+\\left(\\frac{m_{3}\\,{l_{c,3}}^2}{2}+\\frac{I_{3,\\mathrm{zz}}}{2}\\right)\\,{\\dot{q}_{3}}^2\n","truncated":false}}
-%---
-%[output:9fa4849b]
-%   data: {"dataType":"text","outputData":{"text":"\nMatriz de inercia M(q):\n","truncated":false}}
-%---
-%[output:5fd21027]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\left(\\begin{array}{ccc}\nI_{1,\\textrm{zz}}  & 0 & 0\\\\\n0 & m_3 \\,{L_2 }^2 +2\\,m_3 \\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} +m_2 \\,{l_{c,2} }^2 +m_3 \\,{l_{c,3} }^2 +I_{2,\\textrm{zz}} +I_{3,\\textrm{zz}}  & m_3 \\,{l_{c,3} }^2 +L_2 \\,m_3 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} +I_{3,\\textrm{zz}} \\\\\n0 & m_3 \\,{l_{c,3} }^2 +L_2 \\,m_3 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} +I_{3,\\textrm{zz}}  & m_3 \\,{l_{c,3} }^2 +I_{3,\\textrm{zz}} \n\\end{array}\\right)"}}
-%---
-%[output:608a565d]
-%   data: {"dataType":"text","outputData":{"text":"\nLaTeX de M(q):\n\\left(\\begin{array}{ccc} I_{1,\\mathrm{zz}} & 0 & 0\\\\ 0 & m_{3}\\,{L_{2}}^2+2\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,L_{2}\\,l_{c,3}+m_{2}\\,{l_{c,2}}^2+m_{3}\\,{l_{c,3}}^2+I_{2,\\mathrm{zz}}+I_{3,\\mathrm{zz}} & m_{3}\\,{l_{c,3}}^2+L_{2}\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,l_{c,3}+I_{3,\\mathrm{zz}}\\\\ 0 & m_{3}\\,{l_{c,3}}^2+L_{2}\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,l_{c,3}+I_{3,\\mathrm{zz}} & m_{3}\\,{l_{c,3}}^2+I_{3,\\mathrm{zz}} \\end{array}\\right)\n","truncated":false}}
-%---
-%[output:5929d911]
-%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_1^2:\n","truncated":false}}
-%---
-%[output:8f618880]
-%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{I_{1,\\textrm{zz}} }{2}"}}
-%---
-%[output:673bbe1a]
-%   data: {"dataType":"text","outputData":{"text":"LaTeX: \\frac{I_{1,\\mathrm{zz}}}{2}\n","truncated":false}}
-%---
-%[output:6804be4b]
-%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_2^2:\n","truncated":false}}
-%---
-%[output:0ab08848]
+%[output:71673c66]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{m_3 \\,{L_2 }^2 }{2}+m_3 \\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} +\\frac{m_2 \\,{l_{c,2} }^2 }{2}+\\frac{m_3 \\,{l_{c,3} }^2 }{2}+\\frac{I_{2,\\textrm{zz}} }{2}+\\frac{I_{3,\\textrm{zz}} }{2}"}}
 %---
-%[output:3414c340]
+%[output:474aaa01]
 %   data: {"dataType":"text","outputData":{"text":"LaTeX: \\frac{m_{3}\\,{L_{2}}^2}{2}+m_{3}\\,\\cos\\left(q_{3}\\right)\\,L_{2}\\,l_{c,3}+\\frac{m_{2}\\,{l_{c,2}}^2}{2}+\\frac{m_{3}\\,{l_{c,3}}^2}{2}+\\frac{I_{2,\\mathrm{zz}}}{2}+\\frac{I_{3,\\mathrm{zz}}}{2}\n","truncated":false}}
 %---
-%[output:34b23e0f]
-%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_3^2:\n","truncated":false}}
+%[output:6f412a29]
+%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_dot_3^2:\n","truncated":false}}
 %---
-%[output:378cbabd]
+%[output:41f70f41]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\frac{m_3 \\,{l_{c,3} }^2 }{2}+\\frac{I_{3,\\textrm{zz}} }{2}"}}
 %---
-%[output:753e059e]
+%[output:0dd59a79]
 %   data: {"dataType":"text","outputData":{"text":"LaTeX: \\frac{m_{3}\\,{l_{c,3}}^2}{2}+\\frac{I_{3,\\mathrm{zz}}}{2}\n","truncated":false}}
 %---
-%[output:854b957e]
-%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_2 q_3:\n","truncated":false}}
+%[output:0598359b]
+%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_dot_1 q_dot_2:\n","truncated":false}}
 %---
-%[output:5a79efb7]
+%[output:9856851f]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"I_{3,\\textrm{xz}} \\,\\cos \\left(q_2 +q_3 \\right)-I_{3,\\textrm{yz}} \\,\\sin \\left(q_2 +q_3 \\right)+I_{2,\\textrm{xz}} \\,\\cos \\left(q_2 \\right)-I_{2,\\textrm{yz}} \\,\\sin \\left(q_2 \\right)"}}
+%---
+%[output:45ff9be2]
+%   data: {"dataType":"text","outputData":{"text":"LaTeX: I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right)+I_{2,\\mathrm{xz}}\\,\\cos\\left(q_{2}\\right)-I_{2,\\mathrm{yz}}\\,\\sin\\left(q_{2}\\right)\n","truncated":false}}
+%---
+%[output:152394b3]
+%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_dot_1 q_dot_3:\n","truncated":false}}
+%---
+%[output:80cd910e]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"I_{3,\\textrm{xz}} \\,\\cos \\left(q_2 +q_3 \\right)-I_{3,\\textrm{yz}} \\,\\sin \\left(q_2 +q_3 \\right)"}}
+%---
+%[output:3c8f4d56]
+%   data: {"dataType":"text","outputData":{"text":"LaTeX: I_{3,\\mathrm{xz}}\\,\\cos\\left(q_{2}+q_{3}\\right)-I_{3,\\mathrm{yz}}\\,\\sin\\left(q_{2}+q_{3}\\right)\n","truncated":false}}
+%---
+%[output:9a81db9a]
+%   data: {"dataType":"text","outputData":{"text":"\nCoeficiente de q_dot_2 q_dot_3:\n","truncated":false}}
+%---
+%[output:94681b93]
 %   data: {"dataType":"symbolic","outputData":{"name":"","value":"m_3 \\,{l_{c,3} }^2 +L_2 \\,m_3 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} +I_{3,\\textrm{zz}}"}}
 %---
-%[output:2f890b48]
+%[output:3f456646]
 %   data: {"dataType":"text","outputData":{"text":"LaTeX: m_{3}\\,{l_{c,3}}^2+L_{2}\\,m_{3}\\,\\cos\\left(q_{3}\\right)\\,l_{c,3}+I_{3,\\mathrm{zz}}\n","truncated":false}}
+%---
+%[output:059e82df]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"{\\left(\\frac{I_{2,\\textrm{yy}} }{4}+\\frac{{l_{c,2} }^2 \\,m_2 }{4}+\\frac{I_{2,\\textrm{xx}} \\,{\\left(\\frac{\\cos \\left(2\\,q_2 \\right)}{2}+\\frac{1}{2}\\right)}}{2}-\\frac{I_{2,\\textrm{yy}} \\,\\cos \\left(2\\,q_2 \\right)}{4}-\\frac{{l_{c,2} }^2 \\,m_2 \\,\\cos \\left(2\\,q_2 \\right)}{4}\\right)}\\,{{\\dot{q} }_1 }^2 +{\\left(\\frac{m_2 \\,{l_{c,2} }^2 }{2}+\\frac{I_{2,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_2 }^2"}}
+%---
+%[output:968358ea]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n{\\left(\\frac{I_{3,\\textrm{xx}} }{4}+\\frac{I_{3,\\textrm{yy}} }{4}+\\frac{I_{3,\\textrm{xx}} \\,\\sigma_1 }{4}-\\frac{I_{3,\\textrm{yy}} \\,\\sigma_1 }{4}+\\frac{{L_2 }^2 \\,m_3 }{4}+\\frac{{l_{c,3} }^2 \\,m_3 }{4}-\\frac{{L_2 }^2 \\,m_3 \\,\\cos \\left(2\\,q_2 \\right)}{4}-\\frac{{l_{c,3} }^2 \\,m_3 \\,\\sigma_1 }{4}+\\frac{L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(q_3 \\right)}{2}-\\frac{L_2 \\,l_{c,3} \\,m_3 \\,\\cos \\left(2\\,q_2 +q_3 \\right)}{2}\\right)}\\,{{\\dot{q} }_1 }^2 +{\\left(\\frac{I_{3,\\textrm{zz}} }{2}+\\frac{m_3 \\,{\\left(4\\,{L_2 }^2 +8\\,\\cos \\left(q_3 \\right)\\,L_2 \\,l_{c,3} +4\\,{l_{c,3} }^2 \\right)}}{8}\\right)}\\,{{\\dot{q} }_2 }^2 +{\\left(I_{3,\\textrm{zz}} +\\frac{m_3 \\,{\\left(4\\,{l_{c,3} }^2 +4\\,L_2 \\,\\cos \\left(q_3 \\right)\\,l_{c,3} \\right)}}{4}\\right)}\\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +{\\left(\\frac{m_3 \\,{l_{c,3} }^2 }{2}+\\frac{I_{3,\\textrm{zz}} }{2}\\right)}\\,{{\\dot{q} }_3 }^2 \\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 =\\cos \\left(2\\,q_2 +2\\,q_3 \\right)\n\\end{array}"}}
+%---
+%[output:249b1dc6]
+%   data: {"dataType":"symbolic","outputData":{"name":"","value":"\\begin{array}{l}\n\\frac{I_{2,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 }{2}+\\frac{I_{3,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 }{2}+\\frac{I_{1,\\textrm{zz}} \\,{{\\dot{q} }_1 }^2 }{2}+\\frac{I_{2,\\textrm{zz}} \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{I_{3,\\textrm{zz}} \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{I_{3,\\textrm{zz}} \\,{{\\dot{q} }_3 }^2 }{2}+\\frac{{L_2 }^2 \\,m_3 \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{{l_{c,2} }^2 \\,m_2 \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_2 }^2 }{2}+\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_3 }^2 }{2}+I_{3,\\textrm{zz}} \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 -\\frac{I_{3,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 \\,\\sigma_2 }{2}+\\frac{I_{3,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 \\,\\sigma_2 }{2}-\\frac{I_{2,\\textrm{xx}} \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}+\\frac{I_{2,\\textrm{yy}} \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}+L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_2 }^2 +{l_{c,3} }^2 \\,m_3 \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +\\frac{{l_{c,3} }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,\\sigma_2 }{2}+\\frac{{L_2 }^2 \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}+\\frac{{l_{c,2} }^2 \\,m_2 \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 \\right)}^2 }{2}+L_2 \\,l_{c,3} \\,m_3 \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 +L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,{\\sin \\left(q_2 +\\frac{q_3 }{2}\\right)}^2 -L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_1 }^2 \\,\\sigma_1 -2\\,L_2 \\,l_{c,3} \\,m_3 \\,{{\\dot{q} }_2 }^2 \\,\\sigma_1 -2\\,L_2 \\,l_{c,3} \\,m_3 \\,{\\dot{q} }_2 \\,{\\dot{q} }_3 \\,\\sigma_1 \\\\\n\\mathrm{}\\\\\n\\textrm{where}\\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_1 ={\\sin \\left(\\frac{q_3 }{2}\\right)}^2 \\\\\n\\mathrm{}\\\\\n\\;\\;\\sigma_2 ={\\sin \\left(q_2 +q_3 \\right)}^2 \n\\end{array}"}}
 %---
