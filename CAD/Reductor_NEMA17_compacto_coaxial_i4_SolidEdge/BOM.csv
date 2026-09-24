@@ -1,0 +1,8 @@
+Componente,Cantidad,Especificacion,Notas
+Carcasa compacta,1,impresa/mecanizada,base + alojamiento
+Piñon entrada,1,16T m0.5,"eje NEMA17 Ø5, fijación prisionero sobre plano"
+Engranaje compuesto,1,32T + 16T m0.5,sobre eje Ø4
+Corona salida,1,32T m0.5,sobre eje salida Ø4
+Rodamiento,4,4x13x4 mm,2 intermedio + 2 salida
+Eje intermedio,1,Ø4 mm,
+Eje salida con brida,1,Ø4 mm / brida Ø22,4x M3
