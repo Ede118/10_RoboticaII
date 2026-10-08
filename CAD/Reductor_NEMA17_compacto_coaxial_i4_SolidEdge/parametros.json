@@ -1,0 +1,32 @@
+{
+  "relation_total": 4.0,
+  "module_mm": 0.5,
+  "teeth": [
+    16,
+    32,
+    16,
+    32
+  ],
+  "center_distance_mm": 12.0,
+  "input_axis_height_mm": 35.0,
+  "output_axis_height_mm": 35.0,
+  "input_output_coaxial": true,
+  "bearing_mm": [
+    4,
+    13,
+    4
+  ],
+  "largest_gear_OD_mm": 17.0,
+  "housing_upper_bbox_mm": [
+    38.0,
+    32.0,
+    36.0
+  ],
+  "base_bbox_mm": [
+    44.0,
+    45.0,
+    4.0
+  ],
+  "motor_shaft_assumed_protrusion_mm": 17.0,
+  "axial_gap_between_motor_shaft_tip_and_output_shaft_tip_mm": 0.8
+}

@@ -1,0 +1,39 @@
+{
+  "ratio": 5,
+  "stages": [
+    [
+      15,
+      30
+    ],
+    [
+      16,
+      40
+    ]
+  ],
+  "module_mm": 0.5,
+  "pressure_angle_deg": 20.0,
+  "gear_face_mm": 5.0,
+  "axis_input": {
+    "x": 23.0,
+    "z": 35.0
+  },
+  "axis_intermediate": {
+    "x": 30.071180555555557,
+    "z": 43.749908888138954
+  },
+  "axis_output": {
+    "x": 41.0,
+    "z": 35.0
+  },
+  "bearing_mm": [
+    4,
+    13,
+    4
+  ],
+  "flange": {
+    "diameter": 24.0,
+    "pcd": 16.0,
+    "holes": 4,
+    "hole_d": 3.3
+  }
+}

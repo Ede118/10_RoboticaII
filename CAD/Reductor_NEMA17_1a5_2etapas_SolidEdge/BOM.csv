@@ -1,0 +1,10 @@
+﻿Item,Cantidad,Descripcion,Dato principal
+Carcasa principal,1,Carcasa compacta abierta atrás + base,62x38 mm base aprox; ejes a 35 mm
+Tapa trasera,1,Tapa desmontable,4 mm espesor
+Piñón entrada,1,Engranaje recto 15T,m=0.5; D primitivo=7.5 mm; D ext=8.5 mm; D-bore NEMA Ø5
+Engranaje intermedio,1,Compuesto 30T + 16T,m=0.5; eje Ø4
+Rueda salida,1,Engranaje recto 40T,m=0.5; D primitivo=20 mm; D ext=21 mm
+Rodamiento 4x13x4,4,2 eje intermedio + 2 eje salida,ID4 OD13 B4
+Eje intermedio,1,Eje Ø4 mm,Apoyado en 2 rodamientos
+Eje salida/brida,1,Eje Ø4 + brida Ø24,4xM3 PCD16
+NEMA17,1,Motor de referencia,Eje Ø5 con plano; patrón 31 mm

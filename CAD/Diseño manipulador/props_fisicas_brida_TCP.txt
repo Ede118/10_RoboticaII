@@ -1,0 +1,39 @@
+	 Informe de propiedades físicas	 Part: C:\Users\Ignacio\Desktop\ROBOT 2\brida_TCP.par		 9/3/2026   0:33 Am
+
+	 densidad= 1,240000 	 kg/dm^3    
+
+	       volumen= 8451,703447 	 mm^3    
+	         masa= 0,010480 	 kg    
+	 Área de la superficie= 4477,238838 	 mm^2    
+
+	 Respecto al Sistema de coordenadas global :
+
+	 Centro de masa :
+		 X= 0,000000 	 mm    
+		 Y= -0,000000 	 mm    
+		 Z= 9,713267 	 mm    
+
+	 Centro de volumen :
+		 X= 0,000000 	 mm    
+		 Y= -0,000000 	 mm    
+		 Z= 9,713267 	 mm    
+
+	 Momentos de inercia de la masa :
+		 Ixx= 0,000210 	 kg*dm^2    	 Iyy= 0,000411 	 kg*dm^2    	 Izz= 0,000269 kg*dm^2    
+		 Ixy= 0,000000 	 kg*dm^2    	 Ixz= 0,000000 	 kg*dm^2    	 Iyz= -0,000000 	 kg*dm^2    
+
+	 Orientación de ejes principales :
+		 X= 0,000000 	1,000000 	0,000000 	
+		 Y= 0,000000 	0,000000 	1,000000 	
+		 Z= 1,000000 	0,000000 	0,000000 	
+
+	 Respecto a los ejes principales :
+
+	 Momentos de inercia principales :
+		 I1= 0,000312 	 kg*dm^2    	 I2= 0,000269 	 kg*dm^2    	 I3= 0,000111 	 kg*dm^2    
+
+	 Radios de giro :
+		 Rx= 17,256694 	 mm    
+		 Ry= 16,034148 	 mm    
+		 Rz= 10,283232 	 mm    
+

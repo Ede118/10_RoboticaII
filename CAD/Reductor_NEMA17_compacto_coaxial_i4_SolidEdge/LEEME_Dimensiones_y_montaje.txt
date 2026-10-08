@@ -1,0 +1,35 @@
+REDUCTOR COMPACTO COAXIAL NEMA17 - DOS ETAPAS
+
+Arquitectura:
+- Tren revertido de dos etapas.
+- Entrada y salida COAXIALES pero físicamente independientes.
+- Entrada por la cara frontal; salida por la cara trasera.
+- Eje intermedio desplazado 12.00 mm.
+
+Transmisión:
+- Etapa 1: 16 -> 32 = 2.000
+- Etapa 2: 16 -> 32 = 2.000
+- Relación total: 4.000:1
+- Módulo: 0.5 mm, presión: 20.0°
+- Corona más grande: Ø exterior aprox. 17.0 mm
+
+Ejes:
+- Entrada NEMA17 Ø5 mm, D-flat; pinón con prisionero M2.5/M3 sobre plano.
+- Salida Ø4 mm con brida Ø22 mm.
+- Altura del eje de salida: EXACTAMENTE 35 mm desde la cara superior de la base.
+- Altura del eje de entrada: 35 mm.
+- Eje intermedio: Ø4 mm.
+
+Rodamientos disponibles utilizados:
+- 4 unidades 4x13x4 mm.
+- 2 en eje intermedio y 2 consecutivos en eje de salida.
+
+Dimensiones aproximadas:
+- Cuerpo superior: 38 x 32 x 36 mm.
+- Base: 44 x 45 mm.
+- La corona máxima es sólo 17.0 mm de diámetro exterior.
+
+IMPORTANTE:
+- Se asumió que el eje del NEMA17 sobresale 17 mm. El eje de salida comienza detrás de su punta, con ~0.8 mm de separación axial, por lo que ambos son coaxiales pero no se unen ni chocan.
+- Para impresión FDM, módulo 0.5 exige buena resolución; para prototipo robusto puede escalarse a m=0.6 conservando la arquitectura.
+- El STEP puede abrirse en Solid Edge y guardarse luego como .asm.

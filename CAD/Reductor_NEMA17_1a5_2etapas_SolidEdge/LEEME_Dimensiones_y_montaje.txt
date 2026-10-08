@@ -1,0 +1,44 @@
+REDUCTOR NEMA17 1:5 - DOS ETAPAS COMPACTO
+
+RELACION
+Etapa 1: 15 / 30 -> i1 = 2.000
+Etapa 2: 16 / 40 -> i2 = 2.500
+Relacion total: i = 5.000
+
+ENGRANAJES
+Modulo: 0.5 mm
+Angulo de presion: 20.0 grados
+Ancho de cara: 5.0 mm
+Mayor engranaje: 40 dientes, diametro exterior 21.00 mm
+Distancia entre centros etapa 1: 11.25 mm
+Distancia entre centros etapa 2: 14.00 mm
+
+EJES (coordenadas respecto a la base)
+Entrada NEMA17: X=23.00 mm, Z=35.00 mm
+Intermedio: X=30.071 mm, Z=43.750 mm
+Salida: X=41.00 mm, Z=35.00 mm
+Entrada y salida estan exactamente a 35 mm sobre la cara superior geometrica de referencia z=0.
+El eje intermedio se eleva 8.750 mm para compactar el conjunto.
+
+RODAMIENTOS
+4 unidades 4x13x4 mm.
+Alojamiento CAD nominal: Ø13.15 mm. AJUSTAR segun tolerancia de impresion/mecanizado.
+Ejes intermedio y salida nominales Ø4 mm.
+
+SALIDA
+Brida exterior Ø24.0 mm, espesor 5.0 mm.
+4 agujeros Ø3.3 mm sobre PCD Ø16.0 mm (pensados para M3).
+El archivo 09 es solo una referencia de un posible eslabon; puede reemplazarse por la geometria real del brazo.
+
+CARCASA
+Base aproximada: 62.0 x 38.0 x 4.0 mm.
+Cuerpo del reductor: 56.0 x 28.0 x 36.0 mm, ubicado desde z=20 a 56 mm.
+4 agujeros de fijacion de base Ø4.5 mm para tornillos M4.
+Patron NEMA17 31 x 31 mm; agujeros Ø3.4 mm.
+
+IMPORTACION EN SOLID EDGE
+Abrir Reductor_NEMA17_1a5_2etapas_ensamble.step y guardar como .asm.
+Los STEP individuales permiten reemplazar/modificar cada pieza por separado.
+
+NOTA DE INGENIERIA
+La salida Ø4 mm es muy compacta y aprovecha los rodamientos disponibles, pero su resistencia a flexion debe verificarse con el torque y la carga radial reales del brazo. Para cargas elevadas, conviene que el eje Ø4 transmita torque a una brida/hub corto y que el brazo quede apoyado por una geometria estructural adicional, o pasar a un rodamiento/eje de mayor diametro.

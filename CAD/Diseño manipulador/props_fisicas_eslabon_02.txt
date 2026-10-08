@@ -1,0 +1,39 @@
+	 Informe de propiedades físicas	 Part: C:\Users\Ignacio\Desktop\ROBOT 2\eslabon_01.par		 9/3/2026   0:32 Am
+
+	 densidad= 1,240000 	 kg/dm^3    
+
+	       volumen= 95412,834313 	 mm^3    
+	         masa= 0,118312 	 kg    
+	 Área de la superficie= 47560,229669 	 mm^2    
+
+	 Respecto al Sistema de coordenadas global :
+
+	 Centro de masa :
+		 X= 62,713770 	 mm    
+		 Y= 3,728090 	 mm    
+		 Z= -0,004598 	 mm    
+
+	 Centro de volumen :
+		 X= 62,713770 	 mm    
+		 Y= 3,728090 	 mm    
+		 Z= -0,004598 	 mm    
+
+	 Momentos de inercia de la masa :
+		 Ixx= 0,007095 	 kg*dm^2    	 Iyy= 0,088139 	 kg*dm^2    	 Izz= 0,088736 kg*dm^2    
+		 Ixy= 0,002512 	 kg*dm^2    	 Ixz= -0,000000 	 kg*dm^2    	 Iyz= -0,000001 	 kg*dm^2    
+
+	 Orientación de ejes principales :
+		 X= -0,000079 	0,002467 	0,999997 	
+		 Y= 0,007326 	0,999970 	-0,002467 	
+		 Z= -0,999973 	0,007326 	-0,000097 	
+
+	 Respecto a los ejes principales :
+
+	 Momentos de inercia principales :
+		 I1= 0,042039 	 kg*dm^2    	 I2= 0,041609 	 kg*dm^2    	 I3= 0,006929 	 kg*dm^2    
+
+	 Radios de giro :
+		 Rx= 59,608869 	 mm    
+		 Ry= 59,303365 	 mm    
+		 Rz= 24,200489 	 mm    
+
